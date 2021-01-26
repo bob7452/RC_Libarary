@@ -15,9 +15,9 @@ enum System_State_Machine
 /*******************************************************************************************/
 //                                         ADC                                             //
 /*******************************************************************************************/
-#define VR_SHUNT1 75
-#define VR_SHUNT2 10
-#define V_FACTOR (uint16_t)(4096 * VR_SHUNT2 / (VR_SHUNT1 + VR_SHUNT2))
+#define R_SHUNT1 75
+#define R_SHUNT2 10
+#define V_FACTOR (uint16_t)(4096 * VR_SHUNT2 / (R_SHUNT1 + R_SHUNT2))
 
 #define ADC_Sampling_Initial_Time_Count 999
 #define Pos_Filter 32

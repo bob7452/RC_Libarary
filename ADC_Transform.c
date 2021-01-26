@@ -49,7 +49,7 @@ void ADC_Transfrom_Fnct(Data_From_ADC * ADC_Data,System_Count * Sys_Cnt,System_F
                 ADC_Data->U16_Temperature = (uint16_t)(((uint32_t)ADC_Data->U16_Temperature * 3 + gu16Temperature) >> 2);
 
                 #if (Pos_Filter > 1)
-                    ADC_Data->I16_Position= (int16_t)(((int32_t)ADC_Data->I16_Position * (POS_FILTER - 1)+gi16Position + (POS_FILTER>>1))/POS_FILTER);
+                    ADC_Data->I16_Position= (int16_t)(((int32_t)ADC_Data->I16_Position * (POS_FILTER - 1)+ gi16Position + (POS_FILTER>>1))/POS_FILTER);
                 #else
                     ADC_Data->I16_Position = gi16Position;
                 #endif
