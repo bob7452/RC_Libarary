@@ -1,7 +1,6 @@
 #ifndef __ADC_Initial_Fnct__H
 #define __ADC_Initial_Fnct__H
 
-#include "stm32f0xx.h"
 #include "Plane.h"
 
 #define ADC_IP								ADC1

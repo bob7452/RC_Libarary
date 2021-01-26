@@ -6,7 +6,7 @@ void ADC_Initial_Fnct(void)
 	ADC_InitTypeDef     ADC_InitStructure;
 	DMA_InitTypeDef 	DMA_InitStructure;
 
-    #ifdef ADC_Samping_Mode 
+    #if ADC_Samping_Mode 
 	    NVIC_InitTypeDef  NVIC_InitStructure;
     #endif
 
@@ -39,7 +39,7 @@ void ADC_Initial_Fnct(void)
 
 	ADC_InitStructure.ADC_Resolution 				= ADC_Resolution_12b; 
 
-	#ifdef ADC_Samping_Mode
+	#if ADC_Samping_Mode
         ADC_InitStructure.ADC_ContinuousConvMode 		= DISABLE;
         ADC_InitStructure.ADC_ExternalTrigConvEdge      = ADC_ExternalTrigConvEdge_Rising;
         ADC_InitStructure.ADC_ExternalTrigConv 		    = ADC_ExternalTrigConv_T1_CC4;   
@@ -52,7 +52,7 @@ void ADC_Initial_Fnct(void)
 	ADC_InitStructure.ADC_ScanDirection 			= ADC_ScanDirection_Upward;
 	ADC_Init(ADC1, &ADC_InitStructure);
 	
-    #ifdef ADC_Samping_Mode
+    #if ADC_Samping_Mode
         NVIC_InitStructure.NVIC_IRQChannel = DMA1_Channel1_IRQn;
         NVIC_InitStructure.NVIC_IRQChannelPriority = 0;
         NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
