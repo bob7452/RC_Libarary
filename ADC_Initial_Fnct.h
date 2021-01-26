@@ -3,6 +3,15 @@
 
 #include "Plane.h"
 
+/*******************************************************************************************/
+//                                 ADC_Sample_Mode_Setting                                 //
+/*******************************************************************************************/
+#define ADC_Samping_Mode  0 // 0:Pulling 1:Interrupt
+
+
+/*******************************************************************************************/
+//                                 ADC_Sample_Common_Setting                               //
+/*******************************************************************************************/
 #define ADC_IP								ADC1
 #define ADC_IP_CLK    						RCC_APB2Periph_ADC1
 #define ADC1_DR_Address 0x40012440
@@ -35,7 +44,6 @@
 #define ADC_GPIO_x_PIN						{ADC_1_PIN, ADC_2_PIN ,ADC_3_PIN,ADC_4_PIN}
 #define ADC_GPIO_x_CLK    					{ADC_1_GPIO_CLK, ADC_2_GPIO_CLK, ADC_3_GPIO_CLK, ADC_4_GPIO_CLK}
 
-#define ADC_Samping_Mode  0 // 0:Pulling 1:Interrupt
 
 #define DMA_Buffer_Size 6;    // Data Counts
 

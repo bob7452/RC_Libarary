@@ -1,6 +1,6 @@
 #include "ADC_Transform.h"
 
-static __IO uint16_t pu16RegularConvData_Tab[8];
+static __IO uint16_t  pu16RegularConvData_Tab[8];
 static __IO uint16_t  gu16VDCBus;       //Unit: mV
 static __IO int16_t   gi16Position ;    //Unit: deg 
 static __IO uint16_t  gu16VDD;          //Unit: mV
@@ -34,9 +34,9 @@ void ADC_Transfrom_Fnct(Data_From_ADC * ADC_Data,System_Count * Sys_Cnt,System_F
         {
             Sys_Flag->ADC_State_Flag |= Start;
             ADC_Data->U16_VDD = gu16VDD;
-            ADC_Data->U16_VDCBus =gu16VDCBus;
-            ADC_Data->U16_Temperature =gu16Temperature;
-            ADC_Data->I16_Position =gi16Position;
+            ADC_Data->U16_VDCBus = gu16VDCBus;
+            ADC_Data->U16_Temperature = gu16Temperature;
+            ADC_Data->I16_Position = gi16Position;
         }
     #else
         if(ADC_Sample_Time_Out_Flag==Start)
@@ -58,9 +58,9 @@ void ADC_Transfrom_Fnct(Data_From_ADC * ADC_Data,System_Count * Sys_Cnt,System_F
             {
                 Sys_Flag->ADC_State_Flag |= Start;
                 ADC_Data->U16_VDD = gu16VDD;
-                ADC_Data->U16_VDCBus =gu16VDCBus;
-                ADC_Data->U16_Temperature =gu16Temperature;
-                ADC_Data->I16_Position =gi16Position;
+                ADC_Data->U16_VDCBus = gu16VDCBus;
+                ADC_Data->U16_Temperature = gu16Temperature;
+                ADC_Data->I16_Position = gi16Position;
             }
         }
     #endif

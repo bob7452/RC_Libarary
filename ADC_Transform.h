@@ -3,6 +3,7 @@
 
 #include "ADC_Initial_Fnct.h"
 #include "Plane.h"
+#include "Global_System_Variable.h"
 
 void ADC_Transfrom_Fnct(Data_From_ADC * ADC_Data,System_Count * Sys_Cnt,System_Flag* Sys_Flag)
 

@@ -10,7 +10,7 @@ void ADC_Initial_Fnct(void)
 	    NVIC_InitTypeDef  NVIC_InitStructure;
     #endif
 
-	unsigned volatile char adc_num_x = ADC_GPIO_x;
+	unsigned volatile char adc_num_x    = ADC_GPIO_x;
 	GPIO_TypeDef* 	pADC_Port[] 		= ADC_GPIO_x_PORT;
 	unsigned short 	pADC_Pin[] 			= ADC_GPIO_x_PIN;
 	unsigned int 	pADC_Pin_Clk[] 	    = ADC_GPIO_x_CLK;	
@@ -37,7 +37,7 @@ void ADC_Initial_Fnct(void)
 
 	ADC_StructInit(&ADC_InitStructure);
 
-	ADC_InitStructure.ADC_Resolution 				= ADC_Resolution_12b; 
+	ADC_InitStructure.ADC_Resolution 				    = ADC_Resolution_12b; 
 
 	#if ADC_Samping_Mode
         ADC_InitStructure.ADC_ContinuousConvMode 		= DISABLE;
