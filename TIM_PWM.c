@@ -109,30 +109,6 @@ void TIM_PWM_Init(void)
 }
 
 /*****************************************************
- * @fn: TIM1_PWM_ONOFF
- *
- * @brief: To Update preload value
- *
- * @param[in]: u8ONOFF
- *
- * @param[out]: N/A
- *
- * @return: N/A
-*****************************************************/
-void TIM1_PWM_ONOFF(eSwitchState_t eONOFF)
-{
-    if (eONOFF != OFF)
-    {
-        // Enable the TIM Main Output
-        TIM1->BDTR |= TIM_BDTR_MOE;
-    }
-    else
-    {
-        // Disable the TIM Main Output
-        TIM1->BDTR &= (uint16_t)(~TIM_BDTR_MOE);
-    }
-}
-/*****************************************************
  * @fn: TIMx_PWM_ONOFF
  *
  * @brief: To Update preload value
