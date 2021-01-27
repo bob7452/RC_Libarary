@@ -3,6 +3,23 @@
 
 #include "Plane.h"
 
+/*******************************************************************************************/
+//                             System_Definition                                           //
+/*******************************************************************************************/
+#define System_Extern_Osi 16000000uL
+
+enum System_State_Machine
+{
+    Initial =0,
+    Start,
+    Finish
+};
+
+/*******************************************************************************************/
+//                                         ADC                                             //
+/*******************************************************************************************/
+#define V_FACTOR (uint16_t)(4096 * R_SHUNT2 / (R_SHUNT1 + R_SHUNT2))
+
 typedef struct 
 {
     uint16_t    U16_VDCBus;
@@ -12,10 +29,30 @@ typedef struct
     int16_t     I16_D_Factor; // VR ADC_value <-> S16 Form
 }Data_From_ADC;
 
-                             // |bit_7|bit_6|bit_5|bit_4|bit_3|bit_2|bit_1|bit_0|  
+
+/*******************************************************************************************/
+//                                         PWM                                             //
+/*******************************************************************************************/
+enum PWM_Status 
+{
+    Brake =0,
+    Run,
+    FreeRun
+};
+
+typedef struct
+{
+  volatile unsigned short        PWM1;
+  volatile unsigned short        PWM2;
+  volatile unsigned short        PWM3;
+  volatile unsigned short        CCER_Reg;
+  volatile unsigned char         Hall_Status;
+  volatile unsigned char         PWM_Status;
+} PWM_OutputTypeDef;
+
 typedef struct 
 {
-   uint8_t ADC_State_Flag;   // |bit_7|bit_6|bit_5|bit_4|bit_3|bit_2|bit_1|ADC_Initial_State|
+   uint8_t ADC_State_Flag;   
                             
 }System_Flag;
 
@@ -24,12 +61,10 @@ typedef struct
     uint32_t ADC_Time_Count;
 }System_Count;
 
-extern Data_From_ADC   ADC_Data;
-extern System_Flag     Sys_Flag;
-extern System_Count    Sys_Cnt;
-
-
-extern uint8_t Hall_Status;
+extern Data_From_ADC        ADC_Data;
+extern System_Flag          Sys_Flag;
+extern System_Count         Sys_Cnt;
+extern PWM_OutputTypeDef    Pwm_Output;
 
 
 #endif

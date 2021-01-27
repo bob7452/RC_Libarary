@@ -133,3 +133,30 @@ void TIMx_PWM_ONOFF(TIM_TypeDef* TIMx ,eSwitchState_t eONOFF)
     TIMx->BDTR &= (uint16_t)(~((uint16_t)TIM_BDTR_MOE));
   }
 } 
+
+void TIMx_PWM_Duty_Set(TIM_TypeDef* TIXx,PWM_OutputTypeDef* ptr)
+{
+	Switch (ptr->PWM_Status)
+	{
+		case FreeRun:
+			TIXx->CCR1 = 0;
+			TIXx->CCR2 = 0
+			TIXx->CCR3 = 0;
+			TIXx->CCER = 0x0;
+		break;
+
+		case Run:
+			TIXx->CCR1 = ptr->PWM1;
+			TIXx->CCR2 = ptr->PWM2;
+			TIXx->CCR3 = ptr->PWM3;
+			TIXx->CCER = ptr->CCER_Reg;
+		break;
+
+		case Brake:
+			IXx->CCR1 =  0;
+			TIXx->CCR2 = 0
+			TIXx->CCR3 = 0;
+			TIXx->CCER = 0xF555;
+		break;
+	}
+}

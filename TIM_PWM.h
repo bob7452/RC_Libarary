@@ -2,6 +2,7 @@
 #define __TIM1_PWMOUTPUT_H
 
 #include "Plane.h"
+#include "Global_System_Variable.h"
 
 /*******************************************************************************************/
 //                                 PWM_Special_Setting                                     //
@@ -18,6 +19,10 @@
 
 #if (PWM_PERIOD <=0)
   #error "The PWM_Period is illegal"  
+#endif
+
+#if (PWM_PERIOD >= System_Clock)
+  #error "The PWM_Period is illegal" 
 #endif
 
 #if (DEADTIME_NS < 3556)
@@ -96,5 +101,6 @@
 															
 void TIM_PWM_Init(void);
 void TIMx_PWM_ONOFF(TIM_TypeDef* TIXx ,eSwitchState_t eONOFF);
+void TIMx_PWM_Duty_Set(TIM_TypeDef* TIXx,PWM_OutputTypeDef* ptr);
 
 #endif /* __TIM1_PWMOUTPUT_H */
