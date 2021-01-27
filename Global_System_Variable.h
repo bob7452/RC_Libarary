@@ -52,7 +52,7 @@ typedef struct
 
 typedef struct 
 {
-   uint8_t ADC_State_Flag;   
+   bool ADC_State_Flag;   
                             
 }System_Flag;
 
