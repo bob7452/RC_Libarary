@@ -24,3 +24,7 @@ void HALL_Init(void)
 	GPIO_PinAFConfig(HALL_W_GPIO_PORT, HALL_W_GPIO_SOURCE, HALL_W_GPIO_AF);
 }
 
+void HALL_Status_Detection(uint8_t* Status)
+{
+	Status = (SECTOR_VALUE_DEF)GET_HALL_SENSOR_VALUE();
+}

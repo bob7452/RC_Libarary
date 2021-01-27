@@ -12,11 +12,13 @@
 /*******************************************************************************************/
 //                                 PWM_Common_Setting                                      //
 /*******************************************************************************************/
-#define PWM_TIM_PERIOD_SETTING    ((SystemCoreClock / PWM_TIM_OUTPUT_PERIOD) - 1)
-#define PWM_OUTPUT_MAX_VALUE      (PWM_TIM_PERIOD_SETTING)
-#define PWM_MAX_DUTY 			  PWM_TIM_PERIOD_SETTING 
-#define PWM_MIN_DUTY 			  0
+#define PWM_PERIOD                (uint16_t)((System_Clock / (uint32_t)(1 * PWM_FREQ * (PWM_PSC + 1))) - 1)
+#define PWM_MAX_DUTY 			         PWM_PERIOD 
+#define PWM_MIN_DUTY 			         0
 
+#if (PWM_PERIOD <=0)
+  #error "The PWM_Period is illegal"  
+#endif
 
 #if (DEADTIME_NS < 3556)
 #define DEADTIME    ((unsigned short)((unsigned long long)SystemCoreClock \

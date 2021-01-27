@@ -2,8 +2,9 @@
 #define __Plane__H
 
 #include "stm32f0xx.h"
-#include "ADC_Initial_Fnct.h"
-#include "ADC_Transform.h"
+#include "ADC.h"
+#include "Hall_Initial_Fnct.h"
+#include "TIM_PWM.h"
 
 /*******************************************************************************************/
 //                             System_Definition                                           //
@@ -32,6 +33,8 @@ enum System_State_Machine
 /*******************************************************************************************/
 //                                         PWM                                             //
 /*******************************************************************************************/
-#define PWM_TIM_OUTPUT_PERIOD     (16000)
-#define DEADTIME_NS 			   450 //840
+//PWM_PERIOD                (uint16_t)((System_Clock / (uint32_t)(1 * PWM_FREQ * (PWM_PSC + 1))) - 1)
+#define PWM_FREQ                  16000
+#define PWM_PSC                   0
+#define DEADTIME_NS 			  450 
 
