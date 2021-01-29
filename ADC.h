@@ -20,7 +20,7 @@ enum ADC_Sampling_Mode
 /*******************************************************************************************/
 #define ADC_IP								ADC1
 #define ADC_IP_CLK    						RCC_APB2Periph_ADC1
-#define ADC1_DR_Address 0x40012440
+#define ADC1_DR_Address                     0x40012440
 
 #define ADC_1_GPIO_PORT   					GPIOA                                                 //TPC
 #define ADC_1_PIN         					GPIO_Pin_0

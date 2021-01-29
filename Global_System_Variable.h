@@ -4,7 +4,26 @@
 #include "Plane.h"
 
 /*******************************************************************************************/
-//                             System_Definition                                           //
+//                             System_Clock_Declaration                                    //
+/*******************************************************************************************/
+// SysTick Parameters
+#define ERROR_SAMPLING_TIME 	   999		//(999 + 1) * 100u = 100ms
+#define NO_CMD_TIME 			   999	    //(4999 + 1) * 100u = 500ms
+#define LED_FLICKER_TIME 		 49999	    //(4999 + 1) * 100u = 5s
+#define LED_LIGHT_TIME 			  5000	    // 5000 * 100u = 500ms
+#define LED_LIGHT_OFF_TIME (LED_FLICKER_TIME - LED_LIGHT_TIME)
+#define PROTECTION_TIME 				999		//(999 + 1) * 100u = 100ms
+#define DEBUG_TIME 						19999	//(4999 + 1) * 100u = 5s
+#define DEBUG_TIME2 						59999	//(4999 + 1) * 100u = 5s
+#define SETPWM_THRESHOLD_TIME  9
+#define ADC_SAMPLING_TIME      0
+#define IBusPROTECTION_TIME 	 49		//(49 + 1) * 100u = 5ms
+#define LOCK_PROTETION_TIME    9999 //1 sec
+#define LOCK_PROTETION_SEC		 10
+
+
+/*******************************************************************************************/
+//                             System_Variable_Definition                                  //
 /*******************************************************************************************/
 #define System_Extern_Osi 16000000uL
 
@@ -132,6 +151,18 @@ typedef struct
 /*******************************************************************************************/
 //                                         HALL_State                                      //
 /*******************************************************************************************/
+typedef enum
+{
+  SECTOR_0 = 0x00,
+  SECTOR_1 = 0x01,
+  SECTOR_2 = 0x02,
+  SECTOR_3 = 0x03,
+  SECTOR_4 = 0x04,
+  SECTOR_5 = 0x05,
+  SECTOR_6 = 0x06,
+  SECTOR_ERR = 0xFF
+} SECTOR_VALUE_DEF;
+
 #define GET_HALL_SENSOR_VALUE()        	(((HALL_U_GPIO_PORT->IDR & HALL_U_GPIO_PIN) >> HALL_U_GPIO_SOURCE)| \
 	                                    (((HALL_V_GPIO_PORT->IDR & HALL_V_GPIO_PIN) >> HALL_V_GPIO_SOURCE)   << 1) | \
 	                                    (((HALL_W_GPIO_PORT->IDR & HALL_W_GPIO_PIN) >> HALL_W_GPIO_SOURCE) << 2))
@@ -154,10 +185,20 @@ typedef struct
     volatile uint32_t ADC_Time_Count;
 }System_Count;
 
-
+/*******************************************************************************************/
+//                             		Math_Formula_Define                                    //
+/*******************************************************************************************/
+#define Abs(x) (x ^ (x >> 31)) - (x >> 31)
+#define Round_Value(x,y) (x+(y>>1))/y 
+#define Round_Value_Nbit(x,N) (x+(1<<(N-1)))>>N
 
 /*******************************************************************************************/
-//                              Global_Variable_Define                                     //
+//                             		PID_Loop_Freq                                    	   //
+/*******************************************************************************************/
+#define PID_Loop_Freq_Mhz 10
+
+/*******************************************************************************************/
+//                              	Global_Variable_Define                                 //
 /*******************************************************************************************/
 extern Data_From_ADC        ADC_Data;
 extern System_Flag          Sys_Flag;

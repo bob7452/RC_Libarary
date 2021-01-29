@@ -4,18 +4,6 @@
 #include "Plane.h"
 #include "Global_System_Variable.h"
 
-typedef enum
-{
-  SECTOR_0 = 0x00,
-  SECTOR_1 = 0x01,
-  SECTOR_2 = 0x02,
-  SECTOR_3 = 0x03,
-  SECTOR_4 = 0x04,
-  SECTOR_5 = 0x05,
-  SECTOR_6 = 0x06,
-  SECTOR_ERR = 0xFF
-} SECTOR_VALUE_DEF;
-
 //-------------------------------------------------------------------------------------
 #define HALL_GPIO_PORT 								GPIOA
 //Hall-1

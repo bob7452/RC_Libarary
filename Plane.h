@@ -26,6 +26,7 @@ enum Mode_Switch
 
 #define Pos_Filter 32
 #define ADC_Sampling_Initial_Time_Count 999
+
 /*******************************************************************************************/
 //                                         PWM                                             //
 /*******************************************************************************************/
@@ -39,3 +40,11 @@ enum Mode_Switch
 #define ICP_CLK                  2000000uL
 #define Disturbance_Protection_Fnct OFF
 
+/*******************************************************************************************/
+//                                         PID                                             //
+/*******************************************************************************************/
+#define PID_Pos_Loop_Time   19   //     (19 + 1) * 100u = 2ms
+#define PID_Pos_Unit_Time   2    //     50/(PID_POSITION_SAMPLING_TIME+1)
+
+#define PID_Spd_Loop_Time   9    //     ( 9 + 1) * 100u = 1ms
+#define PID_Spd_Unit_Time   1	 //     10/(PID_SPEED_SAMPLING_TIME+1)

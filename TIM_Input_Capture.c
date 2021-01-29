@@ -11,7 +11,7 @@ typedef struct
      volatile static uint16_t Uart_Port_Ms_Lower;
      volatile static uint16_t Uart_Port_Ms_Upper;
      volatile static uint16_t PPM_Capture_Period;
-     volatile static uint16_t PPM_Capture_Rasing_Edge_Value;
+     volatile static uint16_t PPM_Capture_Rasing_Edge_Last;
 	 volatile static uint16_t PPM_Capture_Both_Edge_Value[2];
 	 volatile static uint8_t  Capture_Array_Index;
 }Capture_Group;
@@ -124,8 +124,8 @@ void TIM_Input_Capture_Interrupt_Fnct(sEscParas_t* EscConfig,System_Flag* Sys_Fl
             if(GPIO_Voltage_Level)
 			{
                 PPM_Group.PPM_Capture_Value[0] = TIM_GetCapture1(IC_TIMx);
-                u32Capture_Rising = (uint16_t)(PPM_Group.PPM_Capture_Value[0]-PPM_Group.PPM_Capture_Rasing_Edge_Value);
-                PPM_Group.PPM_Capture_Rasing_Edge_Value =  PPM_Group.PPM_Capture_Value[0];	
+                u32Capture_Rising = (uint16_t)(PPM_Group.PPM_Capture_Value[0]-PPM_Group.PPM_Capture_Rasing_Edge_Last);
+                PPM_Group.PPM_Capture_Rasing_Edge_Last =  PPM_Group.PPM_Capture_Value[0];	
                 PPM_Group.PPM_Capture_Period = (u32Capture_Rising + 500)/1000 * 5;
                 return;
             }

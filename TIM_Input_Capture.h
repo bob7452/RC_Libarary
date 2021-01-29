@@ -11,8 +11,6 @@ enum RC_Receive_Mode
     Special_Mode
 };
 
-#define Rx_Mode_Detect(rx) ((rx & Normal_Mode) | (rx & SSR_Mode) | (rx & Special_Mode))
-
 #define IC_TIMx						        TIM3
 #define IC_TIMx_CLK    					    RCC_APB1Periph_TIM3
 
@@ -33,6 +31,10 @@ enum RC_Receive_Mode
 #else
     #error "ICP_CLK IS Illegal"
 #endif
+
+#define Rx_Mode_Detect(rx) ((rx & Normal_Mode) | (rx & SSR_Mode) | (rx & Special_Mode))
+#define Ratio_Signal_to_Control PID_Loop_Freq_Mhz/ICP_CLK_MHZ
+
 
 void TIM_IC_Init(void);
 void PPM_Capture_Parameters_Init(sEscParas_t EscConfig,System_Flag Sys_Flag);
