@@ -4,11 +4,12 @@
 #include "Plane.h"
 #include "Global_System_Variable.h"
 
+enum
 /*******************************************************************************************/
 //                                 PWM_Special_Setting                                     //
 /*******************************************************************************************/
-#define PWM_Interrupt 0
-#define PWM_Preloader 0
+#define PWM_Interrupt OFF
+#define PWM_Preloader OFF
 
 /*******************************************************************************************/
 //                                 PWM_Common_Setting                                      //

@@ -108,17 +108,6 @@ void TIM_PWM_Init(void)
     TIM1->CCER = 0xF555; 
 }
 
-/*****************************************************
- * @fn: TIMx_PWM_ONOFF
- *
- * @brief: To Update preload value
- *
- * @param[out]: N/A
- *
- * @param[in]: u8ONOFF
- *
- * @return: N/A
-*****************************************************/
 void TIMx_PWM_ONOFF(TIM_TypeDef* TIMx ,eSwitchState_t eONOFF)
 {
   //TIM_CtrlPWMOutputs(TIM1, (FunctionalState)eONOFF);
@@ -138,21 +127,21 @@ void TIMx_PWM_Duty_Set(TIM_TypeDef* TIXx,PWM_OutputTypeDef* ptr)
 {
 	Switch (ptr->PWM_Status)
 	{
-		case FreeRun:
+		case PWM_FreeRun:
 			TIXx->CCR1 = 0;
 			TIXx->CCR2 = 0
 			TIXx->CCR3 = 0;
 			TIXx->CCER = 0x0;
 		break;
 
-		case Run:
+		case PWM_Run:
 			TIXx->CCR1 = ptr->PWM1;
 			TIXx->CCR2 = ptr->PWM2;
 			TIXx->CCR3 = ptr->PWM3;
 			TIXx->CCER = ptr->CCER_Reg;
 		break;
 
-		case Brake:
+		case PWM_Brake:
 			IXx->CCR1 =  0;
 			TIXx->CCR2 = 0
 			TIXx->CCR3 = 0;

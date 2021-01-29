@@ -23,8 +23,3 @@ void HALL_Init(void)
 	GPIO_PinAFConfig(HALL_V_GPIO_PORT, HALL_V_GPIO_SOURCE, HALL_V_GPIO_AF);
 	GPIO_PinAFConfig(HALL_W_GPIO_PORT, HALL_W_GPIO_SOURCE, HALL_W_GPIO_AF);
 }
-
-void HALL_Status_Detection(PWM_OutputTypeDef * ptr)
-{
-	ptr->Hall_Status = (SECTOR_VALUE_DEF)GET_HALL_SENSOR_VALUE();
-}

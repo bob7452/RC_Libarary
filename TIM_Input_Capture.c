@@ -1,47 +1,27 @@
 #include "TIM_Input_Capture.h"
 
+/*******************************************************************************************/
+//                               Local_Variable_Declaration                                //
+/*******************************************************************************************/
+typedef struct
+{
+     volatile static uint16_t u16CaptureMax;
+     volatile static uint16_t u16CaptureMid;
+     volatile static uint16_t u16CaptureMin;
+     volatile static uint16_t Uart_Port_Ms_Lower;
+     volatile static uint16_t Uart_Port_Ms_Upper;
+     volatile static uint16_t PPM_Capture_Period;
+     volatile static uint16_t PPM_Capture_Rasing_Edge_Value;
+	 volatile static uint16_t PPM_Capture_Both_Edge_Value[2];
+	 volatile static uint8_t  Capture_Array_Index;
+}Capture_Group;
 
+Capture_Group PPM_Group;
 
-__IO uint16_t u16CaptureNumber = 0;
+/*******************************************************************************************/
+//                               Local_Variable_Declaration                                //
+/*******************************************************************************************/
 
-static __IO uint16_t u16IC1ReadValue[2] = {0, 0};
-static __IO uint32_t u16IC1ReadValue_falling_old = 0 ,u16IC1ReadValue_rising_old;
-
-
-
-__IO int16_t gi16TargetAngle_old = 0;
-__IO int32_t gi32TargetAngle_Smooth = 0;//new add
-
-//**************************************	Debug
-__IO uint8_t Debug_flag = 0;
-//**************************************
-
-uint16_t u16Capture_old = 0;
-uint16_t u16CaptureCmdMin = 0;
-__IO uint16_t u16PPM_Period = 0;
-
-uint16_t u16CaptureCmdUP = 0;
-uint16_t u16CaptureCmdDOWN = 0;
-//**************************************
-uint16_t  Deadband_Cnt = 1;
-
-int16_t temp ;
-int a1=0,a2=0;
-//**************************************
-__IO uint8_t ICflag  = 0;//190503
-__IO uint8_t PPMRising = 0;//190503
-__IO uint8_t PPMFalling = 0;//190503
-
-__IO int32_t i32Step_Count = 0;//new_add
-uint8_t PPMfloating_Cnt = 0;
-uint16_t u16Capture_delta = 0;//200521
-uint16_t u16Capture_temp;
-
-uint8_t u8CaptureDir = 0;//200602
-uint8_t u8CaptureDir_old = 0;//200602
-
-uint32_t u32Capture_Rising;	
-bool    SSR_FLAG = false;//201123
 
 void TIM_IC_Init(void)
 {
@@ -90,64 +70,70 @@ void TIM_IC_Init(void)
 }
 
 
-void PPM_Capture_Parameters_Init(sSettingVar_t *tSetting)
+void PPM_Capture_Parameters_Init(sEscParas_t* EscConfig,System_Flag* Sys_Flag);
 {
-    SSR_FLAG = false;
+     uint8_t RC_Rx_Mode = Rx_Mode_Detect(System_Flag->SSR_FLAG);
     
-    if(EscConfig.Protect.u16HallFailOnOff == 0)
+    if(RC_Rx_Mode == SSR_Mode) 
     {
         if(EscConfig.DrvBas.u16PulseHigherTime > 1100)
-            u16CaptureMax = (uint16_t)(ICP_CLK_MHZ * EscConfig.DrvBas.u16PulseHigherTime + 50);
+            PPM_Group.u16CaptureMax = (uint16_t)(ICP_CLK_MHZ * EscConfig.DrvBas.u16PulseHigherTime + 50);
         else
-            u16CaptureMax = (uint16_t)(ICP_CLK_MHZ * 1100 + 50);
+            PPM_Group.u16CaptureMax = (uint16_t)(ICP_CLK_MHZ * 1100 + 50);
         
         if(EscConfig.DrvBas.u16PulseLowerTime < 130 && EscConfig.DrvBas.u16PulseLowerTime > 50)
-            u16CaptureMin = (uint16_t)(ICP_CLK_MHZ * EscConfig.DrvBas.u16PulseLowerTime - 50);
+            PPM_Group.u16CaptureMin = (uint16_t)(ICP_CLK_MHZ * EscConfig.DrvBas.u16PulseLowerTime - 50);
         else
-            u16CaptureMin = (uint16_t)(ICP_CLK_MHZ * 45);//130-85
+            PPM_Group.u16CaptureMin = (uint16_t)(ICP_CLK_MHZ * 45);//130-85
     }
     else
     {
-        u16CaptureMax = (uint16_t)(ICP_CLK_MHZ * EscConfig.DrvBas.u16PulseHigherTime + 50);
-        u16CaptureMin = (uint16_t)(ICP_CLK_MHZ * EscConfig.DrvBas.u16PulseLowerTime - 50);
+        PPM_Group.u16CaptureMax = (uint16_t)(ICP_CLK_MHZ * EscConfig.DrvBas.u16PulseHigherTime + 50);
+        PPM_Group.u16CaptureMin = (uint16_t)(ICP_CLK_MHZ * EscConfig.DrvBas.u16PulseLowerTime - 50);
         
-        u16CaptureMid =  (uint16_t)(ICP_CLK_MHZ * (EscConfig.DrvBas.u16PulseCentralTime));
-        u16RightLimit = (uint16_t)(ICP_CLK_MHZ * EscConfig.DrvBas.u16PulseHigherTime); 
-        u16CaptureDiv =  u16RightLimit - u16CaptureMid;
+        PPM_Group.u16CaptureMid =  (uint16_t)(ICP_CLK_MHZ * (EscConfig.DrvBas.u16PulseCentralTime));
+        PPM_Group.u16RightLimit = (uint16_t)(ICP_CLK_MHZ * EscConfig.DrvBas.u16PulseHigherTime); 
+        PPM_Group.u16CaptureDiv =  u16RightLimit - u16CaptureMid;
     }
-	u16CapturePM25 = 13600 ; 
-	u16CapturePM30 = 15000 ; 
 
+	PPM_Group.Uart_Port_Ms_Lower = 13600 ; 
+	PPM_Group.Uart_Port_Ms_Upper = 15000 ; 
 }
 
 
-void TIM14_Input_Capture_Int(void)
+void TIM_Input_Capture_Interrupt_Fnct(sEscParas_t* EscConfig,System_Flag* Sys_Flag)
 {
-	uint8_t u8CmdGPIO;
-	static uint16_t u16Capture=0;
-	//uint32_t u32Capture_Falling,u32Capture_Rising;	
+	uint8_t GPIO_Voltage_Level = GPIO_ReadInputDataBit(IC_GPIO_PORT, IC_GPIO_PIN);
+	uint32_t u32Capture_Rising = 0;
 	
-	if (TIM_GetITStatus(TIM14, TIM_IT_CC1) == SET)
+	if (TIM_GetITStatus(IC_TIMx, IC_Channel_IT_Trigger_Source) == SET)
 	{
 		// Clear TIM1 Capture compare interrupt pending bit
-		TIM_ClearITPendingBit(TIM14, TIM_IT_CC1);
-		u8CmdGPIO = GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_4);
-		//LED_ONOFF(0,ON);
-		if (u16CaptureNumber == 1)
-		{	
-            if(u8CmdGPIO)
-			{
-                //--------------- PPM Step Smooth method --------------------- 
-                u16IC1ReadValue[0] = TIM_GetCapture1(TIM14);
-                        
-                u32Capture_Rising = (uint16_t)(u16IC1ReadValue[0] - u16IC1ReadValue_rising_old );
-                        
-                u16IC1ReadValue_rising_old = u16IC1ReadValue[0];	
+		TIM_ClearITPendingBit(IC_TIMx, IC_Channel_IT_Trigger_Source);
 
-                u16PPM_Period = (u32Capture_Rising + 500)/1000 * 5;
-                //--------------- PPM Step Smooth method ---------------------
+        if ((Sys_Flag->Input_Capture_Flag == Initial) && (GPIO_Voltage_Level))
+		{
+			PPM_Group.PPM_Capture_Value[PPM_Group.Capture_Array_Index++] = TIM_GetCapture1(IC_TIMx);
+			Sys_Flag->Input_Capture_Flag  = Start;
+			PPM_Group.PPM_Capture_Period= EscConfig->DrvBas->u16PulseCentralTime * ICP_CLK_MHZ;
+            return;
+		}
+
+		if (Sys_Flag->Input_Capture_Flag == Start)
+		{	
+            if(GPIO_Voltage_Level)
+			{
+                PPM_Group.PPM_Capture_Value[0] = TIM_GetCapture1(IC_TIMx);
+                u32Capture_Rising = (uint16_t)(PPM_Group.PPM_Capture_Value[0]-PPM_Group.PPM_Capture_Rasing_Edge_Value);
+                PPM_Group.PPM_Capture_Rasing_Edge_Value =  PPM_Group.PPM_Capture_Value[0];	
+                PPM_Group.PPM_Capture_Period = (u32Capture_Rising + 500)/1000 * 5;
                 return;
             }
+        }		
+    }        
+} 
+
+
             else
             {
                 u16IC1ReadValue[1] = TIM_GetCapture1(TIM14);
@@ -359,7 +345,7 @@ void TIM14_Input_Capture_Int(void)
 				gu16CmdSTCnts = NO_CMD_TIME;
 
 			}						 
-			else if (( ( u16Capture > u16CapturePM25 ) && ( u16Capture < u16CapturePM30 )) && ( u8UartCommBusy_flag==0 ) )	 //else if ((u16Capture <= u16CapturePM25) && (u16Capture >  u16CaptureMax))
+			else if (( ( u16Capture > Uart_Port_Ms_Lower ) && ( u16Capture < Uart_Port_Ms_Upper )) && ( u8UartCommBusy_flag==0 ) )	 //else if ((u16Capture <= Uart_Port_Ms_Lower) && (u16Capture >  u16CaptureMax))
 			{
 				u8CommCnt++;   
 
@@ -381,19 +367,3 @@ void TIM14_Input_Capture_Int(void)
 					} 
 				}							 	
 			}
-            
-        }		
-		else if ((u16CaptureNumber == 0)&&(u8CmdGPIO==1))
-		{
-			// Get the Input Capture value
-			//PPMRising++;
-
-			u16IC1ReadValue[0] = TIM_GetCapture1(TIM14);
-			u16CaptureNumber = 1;
-			//u16IC1ReadValue_rising_old=u16IC1ReadValue[0];
-			u16Capture=3000;
-			//u16Capture_old=u16Capture;
-
-		}
-    }        
-}
