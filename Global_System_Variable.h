@@ -7,19 +7,19 @@
 //                             System_Clock_Declaration                                    //
 /*******************************************************************************************/
 // SysTick Parameters
-#define ERROR_SAMPLING_TIME 	   999		//(999 + 1) * 100u = 100ms
-#define NO_CMD_TIME 			   999	    //(4999 + 1) * 100u = 500ms
-#define LED_FLICKER_TIME 		 49999	    //(4999 + 1) * 100u = 5s
-#define LED_LIGHT_TIME 			  5000	    // 5000 * 100u = 500ms
-#define LED_LIGHT_OFF_TIME (LED_FLICKER_TIME - LED_LIGHT_TIME)
+#define ERROR_SAMPLING_TIME 	   		999		//(999 + 1) * 100u = 100ms
+#define NO_CMD_TIME 			   		999	    //(4999 + 1) * 100u = 500ms
+#define LED_FLICKER_TIME 		 		49999	    //(4999 + 1) * 100u = 5s
+#define LED_LIGHT_TIME 			  		5000	    // 5000 * 100u = 500ms
+#define LED_LIGHT_OFF_TIME 				(LED_FLICKER_TIME - LED_LIGHT_TIME)
 #define PROTECTION_TIME 				999		//(999 + 1) * 100u = 100ms
 #define DEBUG_TIME 						19999	//(4999 + 1) * 100u = 5s
-#define DEBUG_TIME2 						59999	//(4999 + 1) * 100u = 5s
-#define SETPWM_THRESHOLD_TIME  9
-#define ADC_SAMPLING_TIME      0
-#define IBusPROTECTION_TIME 	 49		//(49 + 1) * 100u = 5ms
-#define LOCK_PROTETION_TIME    9999 //1 sec
-#define LOCK_PROTETION_SEC		 10
+#define DEBUG_TIME2 					59999	//(4999 + 1) * 100u = 5s
+#define SETPWM_THRESHOLD_TIME  			9
+#define ADC_SAMPLING_TIME      			0
+#define IBusPROTECTION_TIME 	 		49		//(49 + 1) * 100u = 5ms
+#define LOCK_PROTETION_TIME    			9999 //1 sec
+#define LOCK_PROTETION_SEC		 		10
 
 
 /*******************************************************************************************/
@@ -191,7 +191,6 @@ typedef struct
 #define Abs(x) (x ^ (x >> 31)) - (x >> 31)
 #define Round_Value(x,y) (x+(y>>1))/y 
 #define Round_Value_Nbit(x,N) (x+(1<<(N-1)))>>N
-
 /*******************************************************************************************/
 //                             		PID_Loop_Freq                                    	   //
 /*******************************************************************************************/

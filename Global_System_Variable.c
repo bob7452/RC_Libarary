@@ -7,4 +7,4 @@ System_Count    Sys_Cnt;
 PWM_OutputTypeDef Pwm_Output;
 sEscParas_t EscConfig;
 sEscParas_t EscConfig_Write;
-
+Capture_Group PPM_Group;

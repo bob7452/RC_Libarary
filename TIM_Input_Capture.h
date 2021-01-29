@@ -20,6 +20,7 @@ enum RC_Receive_Mode
 #define IC_GPIO_CLK    				        RCC_AHBPeriph_GPIOB
 #define IC_GPIO_AF_MODE				        GPIO_AF_1
 
+#define ICP_CLK                             2000000uL
 #define IC_FILTER                           (uint8_t)0x04
 #define IC_Interrup                         TIM3_IRQn
 #define IC_Channel_Pin                      TIM_Channel_1
@@ -29,11 +30,13 @@ enum RC_Receive_Mode
     #define ICP_CLK_MHZ (uint32_t)(ICP_CLK / 1000000)
     #define ICP_PRSC    ((System_Clock / ICP_CLK) - 1)
 #else
-    #error "ICP_CLK IS Illegal"
+    #error "ICP_CLK_Mhz is illegal"
 #endif
 
 #define Rx_Mode_Detect(rx) ((rx & Normal_Mode) | (rx & SSR_Mode) | (rx & Special_Mode))
-#define Ratio_Signal_to_Control PID_Loop_Freq_Mhz/ICP_CLK_MHZ
+#define Period_Ratio_Signal_to_Control PID_Loop_Freq_Mhz/ICP_CLK_MHZ
+
+
 
 
 void TIM_IC_Init(void);
