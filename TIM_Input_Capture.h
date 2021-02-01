@@ -4,13 +4,6 @@
 #include "Plane.h"
 #include "Global_System_Variable.h"
 
-enum RC_Receive_Mode
-{
-    Normal_Mode =0,
-    SSR_Mode,
-    Special_Mode
-};
-
 #define IC_TIMx						        TIM3
 #define IC_TIMx_CLK    					    RCC_APB1Periph_TIM3
 
@@ -33,14 +26,15 @@ enum RC_Receive_Mode
     #error "ICP_CLK_Mhz is illegal"
 #endif
 
-#define Rx_Mode_Detect(rx) ((rx & Normal_Mode) | (rx & SSR_Mode) | (rx & Special_Mode))
-#define Period_Ratio_Signal_to_Control PID_Loop_Freq_Mhz/ICP_CLK_MHZ
+#define Period_Ratio_Signal_to_Control CLK_Freq_Mhz/ICP_CLK_MHZ
 
 
 
 
 void TIM_IC_Init(void);
-void PPM_Capture_Parameters_Init(sEscParas_t EscConfig,System_Flag Sys_Flag);
-void TIM_Input_Capture_Interrupt_Fnct(sEscParas_t* EscConfig,System_Flag* Sys_Flag);
+void PPM_Capture_Parameters_Init(sEscParas_t* EscConfig);
+void TIM_Input_Capture_Interrupt_Fnct(void);
+void PPM_Process_Fnct();
+void PPM_Filter_Fnct();
 
 #endif 

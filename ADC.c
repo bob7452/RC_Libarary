@@ -5,6 +5,7 @@ static __IO uint16_t  gu16VDCBus;       //Unit: mV
 static __IO int16_t   gi16Position ;    //Unit: deg 
 static __IO uint16_t  gu16VDD;          //Unit: mV
 static __IO uint16_t  gu16Temperature;  //Unit: C
+static __IO uint8_t   ADC_Flag ;
 
 
 void ADC_Initial_Fnct(void)
@@ -117,9 +118,9 @@ void ADC_Initial_Fnct(void)
 
 }
 
-void ADC_Transfrom_Fnct(Data_From_ADC * ADC_Data,System_Count * Sys_Cnt,System_Flag* Sys_Flag)
+void ADC_Transfrom_Fnct(Data_From_ADC * ADC_Data,System_Count * Sys_Cnt)
 {
-    uint8_t ADC_Initial_Flag = (Sys_Flag->ADC_State_Flag & Start); 
+    uint8_t ADC_Initial_Flag = (ADC_Flag & Start); 
     uint8_t ADC_Sample_Time_Out_Flag  = (Sys_Cnt-> ADC_Time_Count == 0);
 
      gu16VDD = (uint16_t)((uint32_t)5079040 / pu16RegularConvData_Tab[5]);   
@@ -143,7 +144,7 @@ void ADC_Transfrom_Fnct(Data_From_ADC * ADC_Data,System_Count * Sys_Cnt,System_F
         }
         else
         {
-            Sys_Flag->ADC_State_Flag |= Start;
+            ADC_Flag |= Start;
             ADC_Data->U16_VDD = gu16VDD;
             ADC_Data->U16_VDCBus = gu16VDCBus;
             ADC_Data->U16_Temperature = gu16Temperature;
@@ -167,7 +168,7 @@ void ADC_Transfrom_Fnct(Data_From_ADC * ADC_Data,System_Count * Sys_Cnt,System_F
             }
             else
             {
-                Sys_Flag->ADC_State_Flag |= Start;
+                ADC_Flag |= Start;
                 ADC_Data->U16_VDD = gu16VDD;
                 ADC_Data->U16_VDCBus = gu16VDCBus;
                 ADC_Data->U16_Temperature = gu16Temperature;

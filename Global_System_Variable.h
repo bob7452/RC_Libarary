@@ -33,6 +33,11 @@ enum System_State_Machine
     Start,
     Finish
 };
+enum System_TX_RX_State
+{
+	Idle =0,
+	Busy
+};
 
 typedef struct 
 {
@@ -113,6 +118,32 @@ typedef struct
 	sVerCtrl_t      VerCtrl;
 }sEscParas_t;
 
+
+/*******************************************************************************************/
+//                                         ICP                                             //
+/*******************************************************************************************/
+typedef struct
+{
+     volatile static uint16_t u16CaptureMax;
+     volatile static uint16_t u16CaptureMid;
+     volatile static uint16_t u16CaptureMin;
+     volatile static uint16_t Uart_Port_Ms_Lower;
+     volatile static uint16_t Uart_Port_Ms_Upper;
+     volatile static uint16_t PPM_Capture_Period;
+     volatile static uint16_t PPM_Capture_Rasing_Edge_Last;
+	 volatile static uint16_t PPM_Capture_Both_Edge_Value[2];
+	 volatile static uint16_t PPM_Capture_Delta;
+	 volatile static uint8_t  PPM_Capture_Dir[2];
+}Capture_Group;
+
+#if (Driving_Mode == Mix)
+	typedef struct 
+	{
+		volatile static uint16_t PPM_Capture_Delta;
+		volatile static uint8_t  PPM_Capture_Dir[2];
+	}Mix_Mode_Group;
+ #endif
+
 /*******************************************************************************************/
 //                                         ADC                                             //
 /*******************************************************************************************/
@@ -172,10 +203,9 @@ typedef enum
 /*******************************************************************************************/
 typedef struct 
 {
-   volatile uint8_t ADC_State_Flag;
-   volatile uint8_t Input_Capture_Flag;
-   volatile uint8_t SSR_FLAG;                        
+	volatile static uint8_t Uart_Busy_Flag;
 }System_Flag;
+
 
 /*******************************************************************************************/
 //                                         Count                                           //
@@ -192,9 +222,9 @@ typedef struct
 #define Round_Value(x,y) (x+(y>>1))/y 
 #define Round_Value_Nbit(x,N) (x+(1<<(N-1)))>>N
 /*******************************************************************************************/
-//                             		PID_Loop_Freq                                    	   //
+//                             		CLK_Freq                                    	   //
 /*******************************************************************************************/
-#define PID_Loop_Freq_Mhz 10
+#define CLK_Freq_Mhz 10
 
 /*******************************************************************************************/
 //                              	Global_Variable_Define                                 //

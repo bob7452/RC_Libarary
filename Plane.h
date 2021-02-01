@@ -2,15 +2,18 @@
 #define __Plane__H
 
 #include "stm32f0xx.h"
-#include "ADC.h"
-#include "Hall_Initial_Fnct.h"
-#include "TIM_PWM.h"
-#include "TIM_Input_Capture.h"
 
 enum Mode_Switch
 {
     OFF =0,
     ON
+};
+
+enum Motor_Driving_Mode
+{
+    Biopolar =0,
+    Complement,
+    Mix
 };
 
 /*******************************************************************************************/
@@ -39,6 +42,15 @@ enum Mode_Switch
 /*******************************************************************************************/
 #define Disturbance_Protection_Fnct OFF
 
+
+#define Special_Mode    On
+#define SSR_Mode        On
+#define Normal          On
+
+#define Special_Mode_Period_us 2400
+#define Special_Mode_Min_us 395 
+#define Special_Mode_Max_us 1125
+#define Special_Mode_Mid_us 760
 /*******************************************************************************************/
 //                                         PID                                             //
 /*******************************************************************************************/
@@ -47,3 +59,9 @@ enum Mode_Switch
 
 #define PID_Spd_Loop_Time   9    //     ( 9 + 1) * 100u = 1ms
 #define PID_Spd_Unit_Time   1	 //     10/(PID_SPEED_SAMPLING_TIME+1)
+
+
+/*******************************************************************************************/
+//                                     Control Mode                                        //
+/*******************************************************************************************/
+#define Driving_Mode Mix
