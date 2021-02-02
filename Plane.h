@@ -2,18 +2,8 @@
 #define __Plane__H
 
 #include "stm32f0xx.h"
+#include "Global_System_Variable.h"
 
-#define On 1
-#define Off 0
-
-#define Mix 1
-#define Biopolar 1
-#define Complement 1
-
-/*******************************************************************************************/
-//                                  System_Definition                                      //
-/*******************************************************************************************/
-#define System_Clock      16000000uL
 
 /*******************************************************************************************/
 //                                         ADC                                             //
@@ -34,23 +24,25 @@
 /*******************************************************************************************/
 //                                         ICP                                             //
 /*******************************************************************************************/
-#define Disturbance_Protection_Fnct OFF
+#define Disturbance_Protection_Fnct Off
 
 #define Special_Mode    On
 #define SSR_Mode        On
 
-#define Special_Mode_Period_us 2400
-#define Special_Mode_Pulse_Min_us 395 
-#define Special_Mode_Pulse_Mid_us 760
-#define Special_Mode_Pulse_Max_us 1125
-#define Special_Mode_Pulse_Limit_us 1100
-#define Special_Signal_Therehold 5
+#define Special_Mode_Hz 833
+#define Special_Mode_Pulse_Min 395 
+#define Special_Mode_Pulse_Mid 760
+#define Special_Mode_Pulse_Max 1125
+#define Special_Signal_Buffer 5
 
-#define SSR_Mode_Pulse_Min_us 45
-#define SSR_Mode_Pulse_Max_us 555
-#define SSR_Signal_Therehold  0
+#define SSR_Mode_Pulse_Min 45
+#define SSR_Mode_Pulse_Max 555
+#define SSR_Signal_Buffer  0
 
-#define Normal_Signal_Therehold 25
+#define Normal_Signal_Buffer 25
+
+#define Signal_Loss_Mode  Back_To_Center       //     Back_to_Center ; Lock_Angle
+
 /*******************************************************************************************/
 //                                         PID                                             //
 /*******************************************************************************************/
@@ -64,4 +56,6 @@
 /*******************************************************************************************/
 //                                     Control Mode                                        //
 /*******************************************************************************************/
-#define Driving_Mode Mix
+#define Driving_Mode    Mix            //      Mix     Biopolar    Complement
+#define Start_Up_Mode   Soft_Start    //      Soft_Start  Quick_Start
+#define Stepping_Mode   On

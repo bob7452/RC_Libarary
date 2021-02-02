@@ -4,7 +4,7 @@
 #include "Plane.h"
 
 /*******************************************************************************************/
-//                             System_Clock_Declaration                                    //
+//                             System_Count_Declaration                                    //
 /*******************************************************************************************/
 // SysTick Parameters
 #define ERROR_SAMPLING_TIME 	   		999		//(999 + 1) * 100u = 100ms
@@ -25,6 +25,7 @@
 /*******************************************************************************************/
 //                             System_Variable_Definition                                  //
 /*******************************************************************************************/
+#define System_Clock      16000000uL
 #define System_Extern_Osi 16000000uL
 
 enum System_State_Machine
@@ -33,7 +34,9 @@ enum System_State_Machine
     Start,
     Finish,
 	Idle = 0,
-	Busy
+	Busy,
+	Off = 0,
+	On
 };
 
 typedef struct 
@@ -119,17 +122,23 @@ typedef struct
 /*******************************************************************************************/
 //                                         ICP                                             //
 /*******************************************************************************************/
+#define Back_To_Center 	1
+#define Lock_Angle 		0
+
+
 typedef struct
 {
-     volatile static uint16_t u16CaptureMax;
-     volatile static uint16_t u16CaptureMid;
-     volatile static uint16_t u16CaptureMin;
-	 volatile static uint16_t u16CaptureLimit;
-     volatile static uint16_t Uart_Port_Ms_Lower;
+     volatile static uint16_t CaptureMax;
+     volatile static uint16_t CaptureMid;
+     volatile static uint16_t CaptureMin;
+	 volatile static uint16_t CaptureLimit;
+	 volatile static uint16_t Capture_Div;
+	 volatile static uint32_t Capture_Period;
+	 volatile static uint16_t Capture_Rasing_Edge[2];
+	 volatile static uint16_t Capture_Both_Edge_Value[2];
+	 volatile static uint16_t Capture_Pulse_Width[2];
+	 volatile static uint16_t Uart_Port_Ms_Lower;
      volatile static uint16_t Uart_Port_Ms_Upper;
-     volatile static uint32_t PPM_Capture_Period;
-     volatile static uint16_t PPM_Capture_Rasing_Edge_Last;
-	 volatile static uint16_t PPM_Capture_Both_Edge_Value[2];
 }Capture_Group;
 
 #if (Driving_Mode == Mix)
@@ -155,13 +164,24 @@ typedef struct
     volatile int16_t     I16_D_Factor; // VR ADC_value <-> S16 Form
 }Data_From_ADC;
 
+/*******************************************************************************************/
+//                                		Control_Mode                                       //
+/*******************************************************************************************/
+#define Quick_Start 	0
+#define Soft_Start		0	
 
 /*******************************************************************************************/
 //                                         PWM                                             //
 /*******************************************************************************************/
-#define PWM_Brake 0
-#define PWM_Run 1
-#define PWM_FreeRun 2
+enum PWM_State
+{
+	PWM_Brake =0,
+	PWM_Run,
+	PWM_FreeRun,
+	Biopolar =0,
+	Complement,
+	Mix
+};
 
 typedef struct
 {
@@ -172,7 +192,6 @@ typedef struct
   volatile unsigned char         Hall_Status;
   volatile unsigned char         PWM_Status;
 } PWM_OutputTypeDef;
-
 
 /*******************************************************************************************/
 //                                         FLAG                                            //
