@@ -76,9 +76,9 @@ void PPM_Capture_Parameters_Init(sEscParas_t* EscConfig)
 	}
 	#endif
 
-	PPM_Group.Capture_Min  = Normal_SSR_Min_Pulse;
+	PPM_Group.Capture_Min  = GUI_Capture_Min;
 	PPM_Group.Capture_Mid  = (uint16_t)(ICP_CLK_MHZ * EscConfig->DrvBas->u16PulseCentralTime);
-	PPM_Group.Capture_Max  = Normal_SSR_Max_Pulse;
+	PPM_Group.Capture_Max  = GUI_Capture_Max;
 	PPM_Group.CaptureLimit = (uint16_t)(ICP_CLK_MHZ * EscConfig->DrvBas->u16PulseHigherTime); 
 	PPM_Group.Capture_Div  =  PPM_Group.CaptureLimit - PPM_Group.Capture_Mid ;
 	PPM_Group.Uart_Port_Ms_Lower = 13600 ; 

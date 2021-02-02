@@ -41,8 +41,6 @@
 
 #define Normal_Signal_Buffer 25
 
-#define Signal_Loss_Mode  Back_To_Center       //     Back_to_Center ; Lock_Angle
-
 /*******************************************************************************************/
 //                                         PID                                             //
 /*******************************************************************************************/
@@ -57,5 +55,4 @@
 //                                     Control Mode                                        //
 /*******************************************************************************************/
 #define Driving_Mode    Mix            //      Mix     Biopolar    Complement
-#define Start_Up_Mode   Soft_Start    //      Soft_Start  Quick_Start
 #define Stepping_Mode   On
