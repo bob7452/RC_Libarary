@@ -31,11 +31,8 @@ enum System_State_Machine
 {
     Initial =0,
     Start,
-    Finish
-};
-enum System_TX_RX_State
-{
-	Idle =0,
+    Finish,
+	Idle = 0,
 	Busy
 };
 
@@ -127,13 +124,12 @@ typedef struct
      volatile static uint16_t u16CaptureMax;
      volatile static uint16_t u16CaptureMid;
      volatile static uint16_t u16CaptureMin;
+	 volatile static uint16_t u16CaptureLimit;
      volatile static uint16_t Uart_Port_Ms_Lower;
      volatile static uint16_t Uart_Port_Ms_Upper;
-     volatile static uint16_t PPM_Capture_Period;
+     volatile static uint32_t PPM_Capture_Period;
      volatile static uint16_t PPM_Capture_Rasing_Edge_Last;
 	 volatile static uint16_t PPM_Capture_Both_Edge_Value[2];
-	 volatile static uint16_t PPM_Capture_Delta;
-	 volatile static uint8_t  PPM_Capture_Dir[2];
 }Capture_Group;
 
 #if (Driving_Mode == Mix)
@@ -143,6 +139,7 @@ typedef struct
 		volatile static uint8_t  PPM_Capture_Dir[2];
 	}Mix_Mode_Group;
  #endif
+
 
 /*******************************************************************************************/
 //                                         ADC                                             //
@@ -162,12 +159,9 @@ typedef struct
 /*******************************************************************************************/
 //                                         PWM                                             //
 /*******************************************************************************************/
-enum PWM_Status 
-{
-    PWM_Brake =0,
-    PWM_Run,
-    PWM_FreeRun
-};
+#define PWM_Brake 0
+#define PWM_Run 1
+#define PWM_FreeRun 2
 
 typedef struct
 {
@@ -179,24 +173,6 @@ typedef struct
   volatile unsigned char         PWM_Status;
 } PWM_OutputTypeDef;
 
-/*******************************************************************************************/
-//                                         HALL_State                                      //
-/*******************************************************************************************/
-typedef enum
-{
-  SECTOR_0 = 0x00,
-  SECTOR_1 = 0x01,
-  SECTOR_2 = 0x02,
-  SECTOR_3 = 0x03,
-  SECTOR_4 = 0x04,
-  SECTOR_5 = 0x05,
-  SECTOR_6 = 0x06,
-  SECTOR_ERR = 0xFF
-} SECTOR_VALUE_DEF;
-
-#define GET_HALL_SENSOR_VALUE()        	(((HALL_U_GPIO_PORT->IDR & HALL_U_GPIO_PIN) >> HALL_U_GPIO_SOURCE)| \
-	                                    (((HALL_V_GPIO_PORT->IDR & HALL_V_GPIO_PIN) >> HALL_V_GPIO_SOURCE)   << 1) | \
-	                                    (((HALL_W_GPIO_PORT->IDR & HALL_W_GPIO_PIN) >> HALL_W_GPIO_SOURCE) << 2))
 
 /*******************************************************************************************/
 //                                         FLAG                                            //
@@ -204,6 +180,7 @@ typedef enum
 typedef struct 
 {
 	volatile static uint8_t Uart_Busy_Flag;
+	volatile static uint8_t ICP_Interrupt_Flag;
 }System_Flag;
 
 
@@ -221,8 +198,10 @@ typedef struct
 #define Abs(x) (x ^ (x >> 31)) - (x >> 31)
 #define Round_Value(x,y) (x+(y>>1))/y 
 #define Round_Value_Nbit(x,N) (x+(1<<(N-1)))>>N
+#define Min_Value(x,y) (x>y) ? y : x
+#define Max_Value(x,y) (x>y) ? x : y
 /*******************************************************************************************/
-//                             		CLK_Freq                                    	   //
+//                             				CLK_Freq                                       //
 /*******************************************************************************************/
 #define CLK_Freq_Mhz 10
 

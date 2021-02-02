@@ -4,11 +4,8 @@
 #include "Plane.h"
 #include "Global_System_Variable.h"
 
-enum ADC_Sampling_Mode
-{
-    Pulling =0,
-    Interrupt
-};
+#define Pulling 0
+#define Interrupt 1
 /*******************************************************************************************/
 //                                 ADC_Sample_Mode_Setting                                 //
 /*******************************************************************************************/

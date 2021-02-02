@@ -33,6 +33,24 @@
 #define HALL_STATE1 				   	    HALL_U_GPIO_PIN
 #define HALL_STATE3 					    (HALL_U_GPIO_PIN | HALL_V_GPIO_PIN)
 
+typedef enum
+{
+  SECTOR_0 = 0x00,
+  SECTOR_1 = 0x01,
+  SECTOR_2 = 0x02,
+  SECTOR_3 = 0x03,
+  SECTOR_4 = 0x04,
+  SECTOR_5 = 0x05,
+  SECTOR_6 = 0x06,
+  SECTOR_ERR = 0xFF
+} SECTOR_VALUE_DEF;
+
+#define GET_HALL_SENSOR_VALUE()        	(((HALL_U_GPIO_PORT->IDR & HALL_U_GPIO_PIN) >> HALL_U_GPIO_SOURCE)| \
+	                                    (((HALL_V_GPIO_PORT->IDR & HALL_V_GPIO_PIN) >> HALL_V_GPIO_SOURCE)   << 1) | \
+	                                    (((HALL_W_GPIO_PORT->IDR & HALL_W_GPIO_PIN) >> HALL_W_GPIO_SOURCE) << 2))
+
+
 void HALL_Init(void);
+void HALL_State(PWM_OutputTypeDef* PWM);
 
 #endif /*__TIMX_HALL_H */

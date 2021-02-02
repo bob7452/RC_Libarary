@@ -4,6 +4,13 @@
 #include "Plane.h"
 #include "Global_System_Variable.h"
 
+#define Period_Ratio_Signal_to_Control CLK_Freq_Mhz/ICP_CLK_MHZ
+
+#define Muti_Mode_Compile	(Special_Mode|SSR_Mode)
+
+#define ICP_Period_Finish 1
+#define ICP_Pusle_Width_Finish 2
+
 #define IC_TIMx						        TIM3
 #define IC_TIMx_CLK    					    RCC_APB1Periph_TIM3
 
@@ -25,10 +32,6 @@
 #else
     #error "ICP_CLK_Mhz is illegal"
 #endif
-
-#define Period_Ratio_Signal_to_Control CLK_Freq_Mhz/ICP_CLK_MHZ
-
-
 
 
 void TIM_IC_Init(void);

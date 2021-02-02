@@ -6,9 +6,11 @@ Capture_Group PPM_Group;
 	Mix_Mode_Group Mix_Group;
 #endif
 
-static uint8_t SSR_Turn_On; 
-static uint8_t SSR_Flag;
-static uint8_t Input_Capture_Flag;
+static uint8_t 		Muti_Mode; 
+static bool 		SSR_Flag;
+static uint8_t 		Input_Capture_Flag;
+static uint16_t		Normal_SSR_Min_Pulse;
+static uint16_t		Normal_SSR_Max_Pulse;
 
 void TIM_IC_Init(void)
 {
@@ -59,11 +61,11 @@ void TIM_IC_Init(void)
 
 void PPM_Capture_Parameters_Init(sEscParas_t* EscConfig)
 {
-	#if (SSR_Mode == On)
+	#if (Muti_Mode_Compile == On)
 	
-		SSR_Turn_On = (EscConfig->Protect->u16HallFailOnOff==0);
+		Muti_Mode = (EscConfig->Protect->u16HallFailOnOff==0);
 		
-		if(SSR_Turn_On) 
+		if(Muti_Mode) 
 		{
 			if(EscConfig.DrvBas.u16PulseHigherTime > 1100)
 				PPM_Group.Capture_Max = (uint16_t)(ICP_CLK_MHZ * EscConfig->DrvBas->u16PulseHigherTime + 50);
@@ -93,6 +95,13 @@ void PPM_Capture_Parameters_Init(sEscParas_t* EscConfig)
 	PPM_Group.Capture_Mid =  (uint16_t)(ICP_CLK_MHZ * (EscConfig->DrvBas->u16PulseCentralTime));
 	PPM_Group.Uart_Port_Ms_Lower = 13600 ; 
 	PPM_Group.Uart_Port_Ms_Upper = 15000 ; 
+
+	#if (SSR_Mode == On)
+	{
+		Normal_SSR_Min_Pulse = Min_Value(((PPM_Group.u16CaptureMix-Normal_Signal_Therehold)*ICP_CLK_MHZ),((SSR_Mode_Pulse_Max_us-SSR_Signal_Therehold)*ICP_CLK_MHZ));
+		Normal_SSR_Max_Pulse = Max_Value(((PPM_Group.u16CaptureMax+Normal_Signal_Therehold)*ICP_CLK_MHZ),((SSR_Mode_Pulse_Max_us+SSR_Signal_Therehold)*ICP_CLK_MHZ));
+	}
+	#endif
 }
 
 
@@ -104,7 +113,7 @@ if (TIM_GetITStatus(IC_TIMx, IC_Channel_IT_Trigger_Source) == SET)
 } 
 */
 
-void TIM_Input_Capture_Interrupt_Fnct(void)
+void TIM_Input_Capture_Interrupt_Fnct(System_Flag * Sys_Flag)
 {
 	uint8_t GPIO_Voltage_Level = GPIO_ReadInputDataBit(IC_GPIO_PORT, IC_GPIO_PIN); // High_Leve 1 Low_Level 0
 	
@@ -119,6 +128,7 @@ void TIM_Input_Capture_Interrupt_Fnct(void)
 	{	
         if(GPIO_Voltage_Level) //Rasing Edge
 		{
+			Sys_Flag->ICP_Interrupt_Flag 	|= ICP_Period_Finish;
             PPM_Group.Capture_Rasing_Edge[0] = TIM_GetCapture1(IC_TIMx);
 			PPM_Group.Capture_Both_Edge[0] 	 = PPM_Group.Capture_Rasing_Edge[0];
             PPM_Group.PPM_Capture_Period 	 = (uint16_t)(PPM_Group.Capture_Rasing_Edge[0] -PPM_Group.Capture_Rasing_Edge[1]); //us
@@ -126,6 +136,7 @@ void TIM_Input_Capture_Interrupt_Fnct(void)
         }
     	else //Falling Edge
         {
+			Sys_Flag->ICP_Interrupt_Flag 	  |= ICP_Pusle_Width_Finish;
         	PPM_Group.PPM_Capture_Both_Edge[1] = TIM_GetCapture1(IC_TIMx);
             PPM_Group.Capture_Pulse_Width[1]   = PPM_Group_Capture_Pulse_Width[0];
             PPM_Group.Capture_Pulse_Width[0]   = (uint16_t)(PPM_Group.Capture_Both_Edge[1] - PPM_Group.Capture_Both_Edge[0]);
@@ -146,21 +157,36 @@ void PPM_Process_Fnct(System_Flag *Sys_Flag)
 		(Sys_Flag->Uart_Busy_Flag ==Idle))
 	{
 
-	#if (Special_Mode == On)
-		if(SSR_Turn_On)
+		
+		if(Muti_Mode)
 		{
-			if ((PPM_Group.PPM_Capture_Period > (Special_Mode_Period_us-10)) && (PPM_Group.PPM_Capture_Period>(Special_Mode_Period_us+10)))
-			{
-				if (/* condition */)
+			#if (Special_Mode == On) /* 833 Hz */
+				if ((PPM_Group.PPM_Capture_Period > ((Special_Mode_Period_us-Special_Signal_Therehold)*ICP_CLK_MHZ)) && \
+					(PPM_Group.PPM_Capture_Period < (Special_Mode_Period_us+Special_Signal_Therehold)*ICP_CLK_MHZ))
 				{
+					if (PPM_Group.PPM_Capture_Both_Edge_Value[0]>=Special_Mode_Pulse_Max_us*ICP_CLK_MHZ && \
+						PPM_Group.PPM_Capture_Both_Edge_Value[0]<=Special_Mode_Pulse_Mid_us*ICP_CLK_MHZ)
+						return;
 					
+					SSR_Flag = false;
+					PPM_Group.u16CaptureMid 	= (uint16_t) (ICP_CLK_MHZ*Special_Mode_Pulse_Mid_us);
+					PPM_Group.u16CaptureLimit 	= (uint16_t) (ICP_CLK_MHZ*Special_Mode_Pulse_Limit_us);		
 				}
-				
-			}
 			
-		}
+			
+			/* 40 Hz ~ 1.66 KHz expect 833 Hz */
+				if ((PPM_Group.PPM_Capture_Period < ((Special_Mode_Period_us-Special_Signal_Therehold)*ICP_CLK_MHZ)) && \
+					(PPM_Group.PPM_Capture_Period > (Special_Mode_Period_us+Special_Signal_Therehold)*ICP_CLK_MHZ))
+				{	
+				 	if	(PPM_Group.PPM_Capture_Both_Edge_Value[0] >= Normal_SSR_Max_Pulse && PPM_Group.PPM_Capture_Both_Edge_Value[0]  <= Normal_SSR_Min_Pulse) 
+                        
 
-	#endif
+				}
+			#endif	
+		}
+		
+	}
+	
 	
 }
 

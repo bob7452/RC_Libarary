@@ -3,18 +3,12 @@
 
 #include "stm32f0xx.h"
 
-enum Mode_Switch
-{
-    OFF =0,
-    ON
-};
+#define On 1
+#define Off 0
 
-enum Motor_Driving_Mode
-{
-    Biopolar =0,
-    Complement,
-    Mix
-};
+#define Mix 1
+#define Biopolar 1
+#define Complement 1
 
 /*******************************************************************************************/
 //                                  System_Definition                                      //
@@ -42,15 +36,21 @@ enum Motor_Driving_Mode
 /*******************************************************************************************/
 #define Disturbance_Protection_Fnct OFF
 
-
 #define Special_Mode    On
 #define SSR_Mode        On
-#define Normal          On
 
 #define Special_Mode_Period_us 2400
-#define Special_Mode_Min_us 395 
-#define Special_Mode_Max_us 1125
-#define Special_Mode_Mid_us 760
+#define Special_Mode_Pulse_Min_us 395 
+#define Special_Mode_Pulse_Mid_us 760
+#define Special_Mode_Pulse_Max_us 1125
+#define Special_Mode_Pulse_Limit_us 1100
+#define Special_Signal_Therehold 5
+
+#define SSR_Mode_Pulse_Min_us 45
+#define SSR_Mode_Pulse_Max_us 555
+#define SSR_Signal_Therehold  0
+
+#define Normal_Signal_Therehold 25
 /*******************************************************************************************/
 //                                         PID                                             //
 /*******************************************************************************************/
