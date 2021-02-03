@@ -11,6 +11,10 @@ static bool 		SSR_Flag;
 static uint8_t 		Input_Capture_Flag;
 static uint16_t		Normal_SSR_Min_Pulse;
 static uint16_t		Normal_SSR_Max_Pulse;
+static uint16_t 	GUI_Capture_Max;
+static uint16_t		GUI_Capture_Min;
+static uint16_t 	GUI_Capture_Mid;
+static uint16_t 	GUI_Capture_Limit;
 
 void TIM_IC_Init(void)
 {
@@ -61,8 +65,12 @@ void TIM_IC_Init(void)
 
 void PPM_Capture_Parameters_Init(sEscParas_t* EscConfig)
 {
-	uint16_t GUI_Capture_Max = (uint16_t)(ICP_CLK_MHZ * EscConfig->DrvBas->u16PulseHigherTime + Normal_Signal_Therehold);
-	uint16_t GUI_Capture_Min = (uint16_t)(ICP_CLK_MHZ * EscConfig->DrvBas->u16PulseLowerTime  - Normal_Signal_Therehold);
+	GUI_Capture_Max = (uint16_t)(ICP_CLK_MHZ * EscConfig->DrvBas->u16PulseHigherTime + Normal_Signal_Therehold);
+	GUI_Capture_Min = (uint16_t)(ICP_CLK_MHZ * EscConfig->DrvBas->u16PulseLowerTime  - Normal_Signal_Therehold);
+	GUI_Capture_Mid = (uint16_t)(ICP_CLK_MHZ * EscConfig->DrvBas->u16PulseCentralTime);
+	GUI_Capture_Limit = (uint16_t)(ICP_CLK_MHZ * EscConfig->DrvBas->u16PulseHigherTime);
+
+	Muti_Mode = (EscConfig->Protect->u16HallFailOnOff == 0)
 
 	#if (SSR_Mode == On)
 	{
@@ -100,9 +108,9 @@ void TIM_Input_Capture_Interrupt_Fnct(System_Flag * Sys_Flag)
 	
     if ((Input_Capture_Flag == Initial) && (GPIO_Voltage_Level))
 	{
-		Sys_Flag->ICP_Interrupt_Flag = 0;
+		Sys_Flag->ICP_Interrupt_Flag |= 0x01;
 		Input_Capture_Flag  = Start;
-		PPM_Group.Capture_Rasing_Edge[1] = TIM_GetCapture1(IC_TIMx);
+		PPM_Group.Capture_Raising_Edge[1] = TIM_GetCapture1(IC_TIMx);
 		PPM_Group.Capture_Pulse_Width[0]= PPM_Group.Capture_Mid;
         return;
 	}
@@ -112,10 +120,10 @@ void TIM_Input_Capture_Interrupt_Fnct(System_Flag * Sys_Flag)
         if(GPIO_Voltage_Level) //Rasing Edge
 		{
 			Sys_Flag->ICP_Interrupt_Flag 	|= ICP_Period_Finish;
-            PPM_Group.Capture_Rasing_Edge[0] = TIM_GetCapture1(IC_TIMx);
-			PPM_Group.Capture_Both_Edge[0] 	 = PPM_Group.Capture_Rasing_Edge[0];
-            PPM_Group.PPM_Capture_Period 	 = (uint16_t)(PPM_Group.Capture_Rasing_Edge[0] -PPM_Group.Capture_Rasing_Edge[1]); //us
-			PPM_Group.Capture_Rasing_Edge[1] = PPM_Group.Capture_Rasing_Edge[0];
+            PPM_Group.Capture_Raising_Edge[0] = TIM_GetCapture1(IC_TIMx);
+			PPM_Group.Capture_Both_Edge[0] 	 = PPM_Group.Capture_Raising_Edge[0];
+            PPM_Group.PPM_Capture_Period 	 = (uint16_t)(PPM_Group.Capture_Raising_Edge[0] -PPM_Group.Capture_Raising_Edge[1]); //us
+			PPM_Group.Capture_Raising_Edge[1] = PPM_Group.Capture_Raising_Edge[0];
         }
     	else //Falling Edge
         {
@@ -131,40 +139,66 @@ void PPM_Process_Fnct(System_Flag *Sys_Flag)
 {
 	#if (Driving_Mode == Mix)
 		Mix_Group.PPM_Capture_Dir[1] = Mix_Group.PPM_Capture_Dir[0];
-		Mix_Group.PPM_Capture_Delta  = (uint16_t)(PPM_Group.PPM_Capture_Both_Edge_Value[0] - PPM_Group.PPM_Capture_Both_Edge_Value[1]);
-		Mix_Group.PPM_Capture_Dir[0] = (PPM_Group.PPM_Capture_Both_Edge_Value[0]>PPM_Group.PPM_Capture_Both_Edge_Value[1]) ? 1 : 0;
+		Mix_Group.PPM_Capture_Delta  = (uint16_t)(PPM_Group.Capture_Pulse_Width[0] - PPM_Group.Capture_Pulse_Width[1]);
+		Mix_Group.PPM_Capture_Dir[0] = (PPM_Group.Capture_Pulse_Width[0]>PPM_Group.Capture_Pulse_Width[1]) ? 1 : 0;
 	#endif
+
+	if ((Sys_Flag->Bus_Status_Flag & 0x2)==Busy || Sys_Flag->Motor_Operation_Status ==Idle)
+		return;
 
 	if((PPM_Group.Capture_Pulse_Width[0] >= PPM_Group.CaptureMin) && \
 		(PPM_Group.Capture_Pulse_Width[0]<=PPM_Group.CaptureMax)  && \
-		(Sys_Flag->Uart_Busy_Flag ==Idle))
+		((Sys_Flag->Bus_Status_Flag & 0x2) ==Idle))
 	{
-		if(Muti_Mode)
-		{
-			#if (Special_Mode == On) /* 833 Hz */
-				if ((PPM_Group.PPM_Capture_Period > ((Special_Mode_Period_us-Special_Signal_Therehold)*ICP_CLK_MHZ)) && \
-					(PPM_Group.PPM_Capture_Period < (Special_Mode_Period_us+Special_Signal_Therehold)*ICP_CLK_MHZ))
-				{
-					if (PPM_Group.PPM_Capture_Both_Edge_Value[0]>=Special_Mode_Pulse_Max_us*ICP_CLK_MHZ && \
-						PPM_Group.PPM_Capture_Both_Edge_Value[0]<=Special_Mode_Pulse_Mid_us*ICP_CLK_MHZ)
-						return;
-					
-					SSR_Flag = false;
-					PPM_Group.u16CaptureMid 	= (uint16_t) (ICP_CLK_MHZ*Special_Mode_Pulse_Mid_us);
-					PPM_Group.u16CaptureLimit 	= (uint16_t) (ICP_CLK_MHZ*Special_Mode_Pulse_Limit_us);		
-				}
-			#endif	
-			
-			/* 40 Hz ~ 1.66 KHz expect 833 Hz */
-				if ((PPM_Group.PPM_Capture_Period < ((Special_Mode_Period_us-Special_Signal_Therehold)*ICP_CLK_MHZ)) && \
-					(PPM_Group.PPM_Capture_Period > (Special_Mode_Period_us+Special_Signal_Therehold)*ICP_CLK_MHZ))
-				{	
-				 	if	(PPM_Group.PPM_Capture_Both_Edge_Value[0] >= Normal_SSR_Max_Pulse && PPM_Group.PPM_Capture_Both_Edge_Value[0]  <= Normal_SSR_Min_Pulse) 
-                        return;
+		#if(Muti_Mode_Compile >=1)
+			if(Muti_Mode)
+			{
+				#if (Special_Mode == On) /* 833 Hz */
+					if ((PPM_Group.PPM_Capture_Period > (Special_Mode_Period_us-Special_Singal_Therehold)) && \
+						(PPM_Group.PPM_Capture_Period < (Special_Mode_Period_us+Special_Singal_Therehold)))
+					{
+						if ((PPM_Group.Capture_Pulse_Width[0]>=Special_Mode_Pulse_Max_us) && \
+							(PPM_Group.Capture_Pulse_Width[0]<=Special_Mode_Pulse_Mid_us))
+							return;
+						
+						SSR_Flag = false;
+						PPM_Group.CaptureMid 	= (uint16_t) (Special_Mode_Pulse_Mid_us);
+						PPM_Group.CaptureLimit 	= (uint16_t) (Special_Mode_Pulse_Limit_us);		
+					}
+				#endif	
+				
+				/* 40 Hz ~ 1.66 KHz expect 833 Hz */
+				#if (SSR_Mode)
+					if ((PPM_Group.PPM_Capture_Period < (Special_Mode_Period_us-Special_Signal_Therehold)) && \
+						(PPM_Group.PPM_Capture_Period > (Special_Mode_Period_us+Special_Signal_Therehold)))
+					{	
+						if	((PPM_Group.Capture_Pulse_Width[0] >= Normal_SSR_Max_Pulse) && \
+							(PPM_Group.Capture_Pulse_Width[0] <= Normal_SSR_Min_Pulse)) 
+							return;
 
-				}
-			
-		}
+						if (PPM_Group.Capture_Pulse_Width[0] >= SSR_Mode_Pulse_Max_us && PPM_Group.Capture_Pulse_Width[0] <= GUI_Capture_Min)
+							SSR_Flag = SSR_Flag;
+						else if (PPM_Group.Capture_Pulse_Width[0]<= SSR_Mode_Pulse_Max_us)	
+							SSR_Flag = true;
+						else
+							SSR_Flag = false;
+					}
+
+					if(SSR_Flag)
+					{
+						PPM_Group.CaptureMid = (uint16_t) SSR_Mode_Pulse_Mid_us;
+						PPM_Group.CaptureLimit = (uint16_t) SSR_Mode_Pulse_Max_us;
+					}
+					else
+					{						
+						PPM_Group.Capture_Mid  = GUI_Capture_Mid;
+						PPM_Group.CaptureLimit = GUI_Capture_Limit; 
+					}
+					
+				#endif
+				PPM_Group.Capture_Div  =  PPM_Group.CaptureLimit - PPM_Group.Capture_Mid ;
+			}
+		#endif
 		
 	}
 	
@@ -177,63 +211,7 @@ void PPM_Process_Fnct(System_Flag *Sys_Flag)
             //***********************************************************************
 			u16PPM_ErrorTime = EscConfig.Protect.u16PpmLossTime;
 			//***********************************************************************
-			if ((u16Capture >= Capture_Min) && (u16Capture <= Capture_Max)&&(u8UartCommBusy_flag==0))
-			{ 
-                //*************************************
-                //Support SSR and NOR and SPECIAL Mode 
-                //*************************************
-                if(EscConfig.Protect.u16HallFailOnOff == 0)
-                {
-                    if(u32Capture_Rising > 2390 && u32Capture_Rising < 2410) //833HZ
-                    {
-                        if(u16Capture <= 2250 && u16Capture >= 790) //  420(395) ~ 1100(1125)
-                        {
-                            SSR_FLAG = false;
-                            
-                            Capture_Mid = (uint16_t)(TIM14_CLK_MHZ * 760);
-                            u16RightLimit = (uint16_t)(TIM14_CLK_MHZ * 1100); 
-                        }
-                        else
-                            return;
-                    }
-                    else //if(u32Capture_Rising >= 1200 && u32Capture_Rising <= 50000)//40HZ ~ 1.66KHZ
-                    {
-                        //SSR : 130(45)~470(555)
-                        //NOR : (Low - 25) ~ (High + 25)
-                        if((u16Capture <= 1110 && u16Capture >= 90) || 
-                           (u16Capture <= (TIM14_CLK_MHZ * EscConfig.DrvBas.u16PulseHigherTime + 50)  && u16Capture >= (TIM14_CLK_MHZ * EscConfig.DrvBas.u16PulseLowerTime - 50)))
-                        {
-                            if(u16Capture >= (TIM14_CLK_MHZ * EscConfig.DrvBas.u16PulseLowerTime - 50) && u16Capture <= 1110)
-                                SSR_FLAG = SSR_FLAG;
-                            else if(u16Capture <= 1110)
-                                SSR_FLAG = true;
-                            else
-                                SSR_FLAG = false;
-                            
-                        }
-                        else
-                            return;
-                        
-                        if(SSR_FLAG)
-                        {
-                            if((MC_CMDFlag==1) || ( gtSystStatus == IDLE ))
-                                return;
-                            else
-                            {
-                                Capture_Mid = (uint16_t)(TIM14_CLK_MHZ * 300);
-                                u16RightLimit = (uint16_t)(TIM14_CLK_MHZ * 470); 
-                            }
-                            
-                        }
-                        else
-                        {
-                            Capture_Mid = (uint16_t)(TIM14_CLK_MHZ * EscConfig.DrvBas.u16PulseCentralTime);
-                            u16RightLimit = (uint16_t)(TIM14_CLK_MHZ * EscConfig.DrvBas.u16PulseHigherTime); 
-                        }
-                    }
-                    
-                    u16CaptureDiv = u16RightLimit - Capture_Mid;
-                }
+
 				//**************************
 				temp =  u16Capture - u16CaptureCmdMin;
 

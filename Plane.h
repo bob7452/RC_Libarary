@@ -36,6 +36,7 @@
 #define Special_Signal_Buffer 5
 
 #define SSR_Mode_Pulse_Min 45
+#define SSR_Mode_Pulse_Mid 300
 #define SSR_Mode_Pulse_Max 555
 #define SSR_Signal_Buffer  0
 

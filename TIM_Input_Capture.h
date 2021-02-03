@@ -6,10 +6,10 @@
 
 #define Period_Ratio_Signal_to_Control CLK_Freq_Mhz/ICP_CLK_MHZ
 
-#define Muti_Mode_Compile	(Special_Mode|SSR_Mode)
+#define Muti_Mode_Compile	(Special_Mode+SSR_Mode)
 
-#define ICP_Period_Finish 1
-#define ICP_Pusle_Width_Finish 2
+#define ICP_Period_Finish 2
+#define ICP_Pusle_Width_Finish 4
 
 #define IC_TIMx						        TIM3
 #define IC_TIMx_CLK    					    RCC_APB1Periph_TIM3
@@ -105,8 +105,23 @@
     #error "SSR_Mode_Pulse_Min is illegal"
 #elif (SSR_Mode_Pulse_Min >= SSR_Mode_Pulse_Max)
     #error "SSR_Mode_Pusle_Min is illegal"
+#elif (SSR_Mode_Pulse_Min >= SSR_Mode_Pulse_Mid)
+    #error "SSR_Mode_Pusle_Min is illegal"
 #else
     #define SSR_Mode_Pulse_Min_us (SSR_Mode_Pulse_Min*ICP_CLK_MHZ)
+#endif
+
+/*******************************************************************************************/
+//                                  SSR_Mode_Pulse_Mid                                     //
+/*******************************************************************************************/
+#if (SSR_Mode_Pulse_Mid <0)
+    #error "SSR_Mode_Pulse_Mid is illegal"
+#elif (SSR_Mode_Pulse_Mid >= SSR_Mode_Pulse_Max)
+    #error "SSR_Mode_Pusle_Mid is illegal"
+#elif  (SSR_Mode_Pulse_Min >= SSR_Mode_Pulse_Mid)
+    #error "SSR_Mode_Pusle_Mid is illegal"
+#else
+    #define SSR_Mode_Pulse_Mid_us (SSR_Mode_Pulse_Mid*ICP_CLK_MHZ)
 #endif
 
 /*******************************************************************************************/
@@ -116,6 +131,8 @@
     #error "SSR_Mode_Pulse_Max is illegal"
 #elif (SSR_Mode_Pulse_Min >= SSR_Mode_Pulse_Max)
     #error "SSR_Mode_Pusle_Max is illegal"
+#elif (SSR_Mode_Pulse_Mid >= SSR_Mode_Pulse_Max)
+    #error "SSR_Mode_Pusle_Mid is illegal"
 #else
     #define SSR_Mode_Pulse_Max_us (SSR_Mode_Pulse_Max*ICP_CLK_MHZ)
 #endif

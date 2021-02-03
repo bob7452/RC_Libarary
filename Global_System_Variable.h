@@ -192,8 +192,9 @@ typedef struct
 /*******************************************************************************************/
 typedef struct 
 {
-	volatile static uint8_t Uart_Busy_Flag;
+	volatile static uint8_t Bus_Status_Flag; 
 	volatile static uint8_t ICP_Interrupt_Flag;
+	volatile static uint8_t Motor_Operation_Status;  
 }System_Flag;
 
 
