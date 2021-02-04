@@ -6,7 +6,7 @@
 
 #define Period_Ratio_Signal_to_Control CLK_Freq_Mhz/ICP_CLK_MHZ
 
-#define Muti_Mode_Compile	(Special_Mode+SSR_Mode)
+#define Muti_Mode_Compile	1//(Special_Mode+SSR_Mode)
 
 #define ICP_Period_Finish 2
 #define ICP_Pusle_Width_Finish 4
@@ -159,11 +159,24 @@
     #define Normal_Signal_Therehold (Normal_Signal_Buffer*ICP_CLK_MHZ)
 #endif
 
-
+/*******************************************************************************************/
+//                                  Basic_PPM_Functions                                    //
+/*******************************************************************************************/
 void TIM_IC_Init(void);
 void PPM_Capture_Parameters_Init(sEscParas_t* EscConfig);
 void TIM_Input_Capture_Interrupt_Fnct(void);
 void PPM_Process_Fnct();
+
+/*******************************************************************************************/
+//                                  Muti_Range_Detection                                   //
+/*******************************************************************************************/
+#if(Muti_Mode_Compile >=1)
+    void Muti_Range_Detection (void);
+#endif
+
+/*******************************************************************************************/
+//                                  PPM_Filter_Fnct                                        //
+/*******************************************************************************************/
 void PPM_Filter_Fnct();
 
 #endif 
