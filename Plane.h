@@ -24,7 +24,8 @@
 /*******************************************************************************************/
 //                                         ICP                                             //
 /*******************************************************************************************/
-#define Disturbance_Protection_Fnct Off
+#define PPM_Filter_Fnct Off
+#define Dead_Band_Fnct On
 
 #define Special_Mode    On
 #define SSR_Mode        On
@@ -57,3 +58,4 @@
 /*******************************************************************************************/
 #define Driving_Mode    Mix            //      Mix     Biopolar    Complement
 #define Stepping_Mode   On
+#define Signal_Sharp_Change_Therehold 25

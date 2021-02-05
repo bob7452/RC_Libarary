@@ -8,9 +8,6 @@
 
 #define Muti_Mode_Compile	1//(Special_Mode+SSR_Mode)
 
-#define ICP_Period_Finish 2
-#define ICP_Pusle_Width_Finish 4
-
 #define IC_TIMx						        TIM3
 #define IC_TIMx_CLK    					    RCC_APB1Periph_TIM3
 
@@ -163,7 +160,7 @@
 //                                  Basic_PPM_Functions                                    //
 /*******************************************************************************************/
 void TIM_IC_Init(void);
-void PPM_Capture_Parameters_Init(sEscParas_t* EscConfig);
+void PPM_Capture_Parameters_Init(sEscParas_t* EscConfig,System_Flag *Sys_Flag);
 void TIM_Input_Capture_Interrupt_Fnct(void);
 void PPM_Process_Fnct();
 
@@ -177,6 +174,25 @@ void PPM_Process_Fnct();
 /*******************************************************************************************/
 //                                  PPM_Filter_Fnct                                        //
 /*******************************************************************************************/
+#if (PPM_Filter_Fnct == On)
 void PPM_Filter_Fnct();
+#endif
 
+/*******************************************************************************************/
+//                                  PPM_Dead_Band_Fnct                                     //
+/*******************************************************************************************/
+#if(Dead_Band_Fnct == On)
+void PPM_Dead_Band_Fnct(void);
 #endif 
+
+/*******************************************************************************************/
+//                                  PPM_Driving_Fnct                                       //
+/*******************************************************************************************/
+#if(Driving_Mode == MIX)
+void Mix_Function(System_Flag* Sys_Flag);
+#endif
+
+#if(Stepping_Mode == On)
+void Stepping_Process(void);
+#endif
+

@@ -130,6 +130,7 @@ typedef struct
 	 volatile static uint16_t CaptureLimit;
 	 volatile static uint16_t Capture_Div;
 	 volatile static uint32_t Capture_Period;
+	 volatile static uint16_t PPM_Factor;
 	 volatile static uint16_t Capture_Rasing_Edge[2];
 	 volatile static uint16_t Capture_Both_Edge_Value[2];
 	 volatile static uint16_t Capture_Pulse_Width[2];
@@ -193,8 +194,8 @@ typedef struct
 typedef struct 
 {
 	volatile static uint8_t Bus_Status_Flag; 
-	volatile static uint8_t ICP_Interrupt_Flag;
-	volatile static uint8_t Motor_Operation_Status;  
+	volatile static uint8_t ICP_Flag;
+	volatile static uint8_t Motor_Operation_Status_Flag;  
 }System_Flag;
 
 
@@ -219,14 +220,21 @@ typedef struct
 /*******************************************************************************************/
 #define CLK_Freq_Mhz 10
 
+
 /*******************************************************************************************/
-//                              	Global_Variable_Define                                 //
+//                                  ICP_Flag_Declaration                                   //
 /*******************************************************************************************/
-extern Data_From_ADC        ADC_Data;
-extern System_Flag          Sys_Flag;
-extern System_Count         Sys_Cnt;
-extern PWM_OutputTypeDef    Pwm_Output;
-extern sEscParas_t          EscConfig;
-extern sEscParas_t          EscConfig_Write;
+#define ICP_Initial_Finish 				0x01
+#define ICP_Period_Finish 				0x02
+#define ICP_Pusle_Width_Finish 			0x04
+#define ICP_Dead_Band_Check_Real 		0x08
+#define ICP_Signal_Sharp_Change_Flag 	0x10
+
+/*******************************************************************************************/
+//                                  Bus_Status_Flag_Declaration                            //
+/*******************************************************************************************/
+#define Bus_Peripheral_Uart				0x00
+#define Bus_Peripheral_PPM 				0x01
+#define	Bus_Uart_Status_Busy 			0x02 				 
 
 #endif
