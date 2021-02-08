@@ -8,7 +8,6 @@ Capture_Group PPM_Group;
 
 static uint8_t 		Muti_Mode; 
 static bool 		SSR_Flag;
-static uint8_t 		Input_Capture_Flag;
 static uint16_t		Normal_SSR_Min_Pulse;
 static uint16_t		Normal_SSR_Max_Pulse;
 static uint16_t 	GUI_Capture_Max;
@@ -20,6 +19,7 @@ static int16_t		Target_Angle;
 static int16_t		Target_Angle_Old;
 static int32_t		TargetAngle_Smooth;
 static uint16_t 	PPM_Loss_Cnt;
+static uint8_t 		GUI_Com_Cnt;
 
 
 void TIM_IC_Init(void)
@@ -99,6 +99,7 @@ void PPM_Capture_Parameters_Init(sEscParas_t* EscConfig,System_Flag *Sys_Flag)
 
 	PPM_Group.Uart_Port_Ms_Lower = 13600 ; 
 	PPM_Group.Uart_Port_Ms_Upper = 15000 ;
+
 	Dead_Band_Cnt = EscConfig->DrvBas->u16DeadBand;
 	PPM_Loss_Cnt = EscConfig.Protect.u16PpmLossTime;
 
@@ -121,18 +122,26 @@ void TIM_Input_Capture_Interrupt_Fnct(System_Flag * Sys_Flag,System_Count *Sys_C
 	uint8_t GPIO_Voltage_Level = GPIO_ReadInputDataBit(IC_GPIO_PORT, IC_GPIO_PIN); // High_Leve 1 Low_Level 0
 	Sys_Cnt->PPM_Loss_Count = PPM_Loss_Cnt;
 	
-    if ((Input_Capture_Flag == Initial) && (GPIO_Voltage_Level))
+    if (((Sys_Flag->ICP_Flag & ICP_Initial_Finish) == false) && (GPIO_Voltage_Level))
 	{
-		Sys_Flag->ICP_Flag 	   			   |= ICP_Initial_Finish;
-		Input_Capture_Flag  				= Start;
-		PPM_Group.Capture_Raising_Edge[1] 	= TIM_GetCapture1(IC_TIMx);
-		PPM_Group.Capture_Pulse_Width[0]	= PPM_Group.Capture_Mid;
+		#if ((PPM_Filter-Muti_Mode_Compile)>0)
+			Sys_Flag->ICP_Flag 	   			   |= ICP_Initial_Finish;
+			PPM_Filter(&Sys_Flag,&Sys_Cnt,GPIO_Voltage_Level);
+			PPM_Group.Capture_Pulse_Width[0]	= PPM_Group.Capture_Mid;
+		#else
+			Sys_Flag->ICP_Flag 	   			   |= ICP_Initial_Finish;
+			PPM_Group.Capture_Raising_Edge[1] 	= TIM_GetCapture1(IC_TIMx);
+			PPM_Group.Capture_Pulse_Width[0]	= PPM_Group.Capture_Mid;
+		#endif
         return;
 	}
 
-	if (Input_Capture_Flag == Start)
+	if ((Sys_Flag->ICP_Flag & ICP_Initial_Finish) == true)
 	{	
-        if(GPIO_Voltage_Level) //Rasing Edge
+		#if ((PPM_Filter-Muti_Mode_Compile)>0)
+			PPM_Filter(&Sys_Flag,&Sys_Cnt,GPIO_Voltage_Level);
+		#else
+		if(GPIO_Voltage_Level) //Rasing Edge
 		{
 			Sys_Flag->ICP_Flag 	 |= ICP_Period_Finish;
             PPM_Group.Capture_Raising_Edge[0] = TIM_GetCapture1(IC_TIMx);
@@ -147,24 +156,25 @@ void TIM_Input_Capture_Interrupt_Fnct(System_Flag * Sys_Flag,System_Count *Sys_C
             PPM_Group.Capture_Pulse_Width[1]   = PPM_Group_Capture_Pulse_Width[0];
             PPM_Group.Capture_Pulse_Width[0]   = (uint16_t)(PPM_Group.Capture_Both_Edge[1] - PPM_Group.Capture_Both_Edge[0]);
         }
+		#endif
     }		       
 } 
 
 void PPM_Process_Fnct(System_Flag *Sys_Flag,Cmd_Group * Cmd)
 {
-	#if (Driving_Mode == Mix)
-		Mix_Group.PPM_Capture_Dir[1] = Mix_Group.PPM_Capture_Dir[0];
-		Mix_Group.PPM_Capture_Delta  = (uint16_t)(PPM_Group.Capture_Pulse_Width[0] - PPM_Group.Capture_Pulse_Width[1]);
-		Mix_Group.PPM_Capture_Dir[0] = (PPM_Group.Capture_Pulse_Width[0]>PPM_Group.Capture_Pulse_Width[1]) ? 1 : 0;
-	#endif
+	if((PPM_Group.Capture_Pulse_Width[0] >= PPM_Group.Uart_Port_Ms_Lower) && (PPM_Group.Capture_Pulse_Width[0]<=PPM_Group.Uart_Port_Ms_Upper))
+		GUI_Com_Cnt++;
 
-	if (((Sys_Flag->Bus_Status_Flag & Bus_Uart_Status_Busy)>>1)==Busy || (Sys_Flag->Motor_Operation_Status_Flag ==Idle))
-		return;
-
-	if((PPM_Group.Capture_Pulse_Width[0] >= PPM_Group.CaptureMin) && \
-		(PPM_Group.Capture_Pulse_Width[0]<=PPM_Group.CaptureMax)  && \
-		(((Sys_Flag->Bus_Status_Flag & Bus_Uart_Status_Busy)>>1)  ==Idle))
+	if (GUI_Com_Cnt >  3)
 	{
+		Sys_Flag->Bus_Status_Flag |= Bus_Arbitration;
+		return;
+	}
+
+	if((PPM_Group.Capture_Pulse_Width[0] >= PPM_Group.CaptureMin) && (PPM_Group.Capture_Pulse_Width[0]<=PPM_Group.CaptureMax) && \
+		(Sys_Flag->Bus_Status_Flag & Bus_Arbitration)==false)
+	{
+		GUI_Com_Cnt = 0;
 		PPM_Group.Capture_Period = Round_Value(PPM_Group.Capture_Period,1000) * Period_Ratio_Signal_to_Control; //Normalize_Cmd_Period (ms)
 
 		#if(Muti_Mode_Compile >=1)
@@ -172,8 +182,13 @@ void PPM_Process_Fnct(System_Flag *Sys_Flag,Cmd_Group * Cmd)
 		#endif
 		
 		#if(Dead_Band_Fnct == On)
-			PPM_Dead_Band_Fnct(Sys_Flag);
+			PPM_Dead_Band_Fnct(&Sys_Flag);
 		#endif
+
+		#if (Driving_Mode == Mix)
+			Mix_Function(&Sys_Flag);
+		#endif
+
 
 		if (Sys_Flag->Motor_Operation_Status_Flag  == RUN || Sys_Flag->Motor_Operation_Status_Flag == INIT)//if (gtSystStatus == RUN )
 		{
@@ -196,9 +211,7 @@ void PPM_Process_Fnct(System_Flag *Sys_Flag,Cmd_Group * Cmd)
 				else
 					Cmd->Step_Count = 0;
 			#endif
-
 		}						 
-		
 	}
 }
 
@@ -308,7 +321,6 @@ void PPM_Dead_Band_Fnct(System_Flag* Sys_Flag)
 		{ 
 			PPM_Bounce_Cnt 		 = 0;
 			Sys_Flag->ICP_Flag 	|= ICP_Dead_Band_Check_Real;
-
 			Bounce_Cmd_Upper 	 = 0;
 			Bounce_Cmd_Mid 		 = PPM_Group.Capture_Pulse_Width[0];
 			Bounce_Cmd_Lower 	 = 0;
@@ -326,9 +338,13 @@ void Mix_Function(System_Flag* Sys_Flag)
 {
 	uint16_t Capture_Tmep;
 
+	Mix_Group.PPM_Capture_Dir[1] = Mix_Group.PPM_Capture_Dir[0];
+	Mix_Group.PPM_Capture_Delta  = (uint16_t)(PPM_Group.Capture_Pulse_Width[0] - PPM_Group.Capture_Pulse_Width[1]);
+	Mix_Group.PPM_Capture_Dir[0] = (PPM_Group.Capture_Pulse_Width[0]>PPM_Group.Capture_Pulse_Width[1]) ? 1 : 0;
+
 	if((Sys_Flag->ICP_Flag & ICP_Dead_Band_Check_Real)>>3)
 	{
-		Sys_Flag->ICP_Flag |=ICP_Signal_Sharp_Change_Flag;	
+		Sys_Flag->ICP_Flag 	|=ICP_Signal_Sharp_Change_Flag;	
 		Capture_Tmep = (uint32_t)Mix_Group.PPM_Capture_Delta*1000/PPM_Group.Capture_Period;
 		if(Capture_Tmep >= Signal_Sharp_Change_Therehold && (Mix_Group.PPM_Capture_Dir[0] == Mix_Group.PPM_Capture_Dir[1]))
 			Sys_Flag->ICP_Flag |= ICP_Signal_Sharp_Change_Flag;
@@ -340,5 +356,45 @@ void Mix_Function(System_Flag* Sys_Flag)
 }
 #endif
 
+ 
+#if ((PPM_Filter-Muti_Mode_Compile)>0)
+void PPM_Filter_Fnct(System_Flag* Sys_Flag,System_Count* Sys_Cnt,uint8_t GPIO_Level)
+{
+	if (((Sys_Flag->ICP_Flag & ICP_PPM_Soft_Interrupt_Flag)>>7==true))
+	{
+		PPM_Group.Capture_Pulse_Width[1] = PPM_Group.Capture_Pulse_Width[0];
+		PPM_Group.Capture_Pulse_Width[0] = (uint16_t)(PPM_Group.Capture_Both_Edge_Value[0]-PPM_Group.Capture_Both_Edge_Value[1]);
+		Sys_Flag->ICP_Flag &= (~ICP_PPM_Soft_Lock_Flag);
+		Sys_Flag->ICP_Flag &= (~ICP_PPM_Soft_Interrupt_Flag);
+		return;
+	}
 
-			
+	if(GPIO_Voltage_Level) //Rasing Edge
+	{
+		if(((Sys_Flag->ICP_Flag & ICP_PPM_Filter_Raising_Lock)>>5)==false)
+		{
+			Sys_Flag->ICP_Flag &= (~ICP_Period_Finish);
+			Sys_Flag->ICP_Flag |= ICP_PPM_Filter_Raising_Lock;
+			Sys_Flag->ICP_Flag |= ICP_PPM_Soft_Lock_Flag;
+			Sys_Cnt->ICP_Filter_Count = PPM_Filter_Cnt;
+			PPM_Group.Capture_Rasing_Edge[0] = TIM_GetCapture1(IC_TIMx);
+			PPM_Group.Capture_Both_Edge_Value[0] = PPM_Group.Capture_Rasing_Edge[0];
+			return;
+		}
+
+		if(((Sys_Flag->ICP_Flag & ICP_PPM_Filter_Raising_Lock)>>5)==true && ((Sys_Flag->ICP_Flag & ICP_PPM_Soft_Lock_Flag)>>6)==false)
+		{
+			Sys_Flag->ICP_Flag &= (~ICP_PPM_Filter_Raising_Lock);
+			PPM_Group.Capture_Rasing_Edge[1] = TIM_GetCapture1(IC_TIMx);
+			PPM_Group.Capture_Period = (uint16_t)(PPM_Group.Capture_Rasing_Edge[0]-PPM_Group.Capture_Rasing_Edge[1]);
+			Sys_Flag->ICP_Flag |= ICP_Period_Finish;
+			return;
+		}
+	}
+	else //Falling Edge
+	{
+	  	PPM_Group.Capture_Both_Edge_Value[1] =  TIM_GetCapture1(IC_TIMx);
+		return;
+	}
+}
+#endif

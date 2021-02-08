@@ -24,7 +24,9 @@
 /*******************************************************************************************/
 //                                         ICP                                             //
 /*******************************************************************************************/
-#define PPM_Filter_Fnct Off
+#define PPM_Filter Off
+#define PPM_Filter_Cnt 28
+
 #define Dead_Band_Fnct On
 
 #define Special_Mode    On

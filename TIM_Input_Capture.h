@@ -6,7 +6,7 @@
 
 #define Period_Ratio_Signal_to_Control CLK_Freq_Mhz/ICP_CLK_MHZ
 
-#define Muti_Mode_Compile	1//(Special_Mode+SSR_Mode)
+#define Muti_Mode_Compile	(Special_Mode+SSR_Mode)
 
 #define IC_TIMx						        TIM3
 #define IC_TIMx_CLK    					    RCC_APB1Periph_TIM3
@@ -162,7 +162,8 @@
 void TIM_IC_Init(void);
 void PPM_Capture_Parameters_Init(sEscParas_t* EscConfig,System_Flag *Sys_Flag);
 void TIM_Input_Capture_Interrupt_Fnct(void);
-void PPM_Process_Fnct(System_Flag *Sys_Flag,Cmd_Group * Cmd)
+void PPM_Process_Fnct(System_Flag *Sys_Flag,Cmd_Group * Cmd);
+
 
 /*******************************************************************************************/
 //                                  Muti_Range_Detection                                   //
@@ -174,8 +175,8 @@ void PPM_Process_Fnct(System_Flag *Sys_Flag,Cmd_Group * Cmd)
 /*******************************************************************************************/
 //                                  PPM_Filter_Fnct                                        //
 /*******************************************************************************************/
-#if (PPM_Filter_Fnct == On)
-void PPM_Filter_Fnct();
+#if ((PPM_Filter_Fnct-Muti_Mode_Compile) > 0)
+void PPM_Filter_Fnct(System_Flag* Sys_Flag,System_Count* Sys_Cnt,uint8_t GPIO_Level);
 #endif
 
 /*******************************************************************************************/
@@ -190,9 +191,5 @@ void PPM_Dead_Band_Fnct(void);
 /*******************************************************************************************/
 #if(Driving_Mode == MIX)
 void Mix_Function(System_Flag* Sys_Flag);
-#endif
-
-#if(Stepping_Mode == On)
-void Stepping_Process(void);
 #endif
 

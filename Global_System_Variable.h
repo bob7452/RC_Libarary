@@ -213,6 +213,7 @@ typedef struct
     volatile uint16_t ADC_Time_Count;
 	volatile uint16_t PPM_Loss_Count;
 	volatile uint16_t Pid_Pos_Count;
+	volatile uint8_t  ICP_Filter_Count;
 }System_Count;
 
 /*******************************************************************************************/
@@ -237,12 +238,14 @@ typedef struct
 #define ICP_Pusle_Width_Finish 			0x04
 #define ICP_Dead_Band_Check_Real 		0x08
 #define ICP_Signal_Sharp_Change_Flag 	0x10
-
+#define ICP_PPM_Filter_Raising_Lock		0x20
+#define ICP_PPM_Soft_Interrupt_Flag		0x40
+#define ICP_PPM_Soft_Interrupt_Flag		0x80
 /*******************************************************************************************/
 //                                  Bus_Status_Flag_Declaration                            //
 /*******************************************************************************************/
-#define Bus_Peripheral_Uart				0x00
-#define Bus_Peripheral_PPM 				0x01
+#define Bus_Peripheral					0x01
 #define	Bus_Uart_Status_Busy 			0x02 				 
+#define Bus_Arbitration	   				0x04
 
 #endif
