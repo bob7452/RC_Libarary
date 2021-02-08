@@ -16,9 +16,11 @@ static uint16_t		GUI_Capture_Min;
 static uint16_t 	GUI_Capture_Mid;
 static uint16_t 	GUI_Capture_Limit;
 static uint8_t 		Dead_Band_Cnt;
+static int16_t		Target_Angle;
 static int16_t		Target_Angle_Old;
 static int32_t		TargetAngle_Smooth;
-static int16_t		Target_Angle;
+static uint16_t 	PPM_Loss_Cnt;
+
 
 void TIM_IC_Init(void)
 {
@@ -98,6 +100,7 @@ void PPM_Capture_Parameters_Init(sEscParas_t* EscConfig,System_Flag *Sys_Flag)
 	PPM_Group.Uart_Port_Ms_Lower = 13600 ; 
 	PPM_Group.Uart_Port_Ms_Upper = 15000 ;
 	Dead_Band_Cnt = EscConfig->DrvBas->u16DeadBand;
+	PPM_Loss_Cnt = EscConfig.Protect.u16PpmLossTime;
 
 	#if(Dead_Band_Fnct == On)
 		Sys_Flag->ICP_Flag |= ICP_Dead_Band_Check_Real;
@@ -113,9 +116,10 @@ if (TIM_GetITStatus(IC_TIMx, IC_Channel_IT_Trigger_Source) == SET)
 } 
 */
 
-void TIM_Input_Capture_Interrupt_Fnct(System_Flag * Sys_Flag)
+void TIM_Input_Capture_Interrupt_Fnct(System_Flag * Sys_Flag,System_Count *Sys_Cnt)
 {
 	uint8_t GPIO_Voltage_Level = GPIO_ReadInputDataBit(IC_GPIO_PORT, IC_GPIO_PIN); // High_Leve 1 Low_Level 0
+	Sys_Cnt->PPM_Loss_Count = PPM_Loss_Cnt;
 	
     if ((Input_Capture_Flag == Initial) && (GPIO_Voltage_Level))
 	{
@@ -146,7 +150,7 @@ void TIM_Input_Capture_Interrupt_Fnct(System_Flag * Sys_Flag)
     }		       
 } 
 
-void PPM_Process_Fnct(System_Flag *Sys_Flag)
+void PPM_Process_Fnct(System_Flag *Sys_Flag,Cmd_Group * Cmd)
 {
 	#if (Driving_Mode == Mix)
 		Mix_Group.PPM_Capture_Dir[1] = Mix_Group.PPM_Capture_Dir[0];
@@ -178,21 +182,22 @@ void PPM_Process_Fnct(System_Flag *Sys_Flag)
 			TargetAngle_Smooth = Target_Angle_Old << 5;
 
 			Angel_Tmp = ((int32_t)PPM_Group.Capture_Pulse_Width[0] - (int32_t)PPM_Group.Capture_Mid);
-			Target_Angle = (int16_t)(( Angel_Tmp*(int32_t)PPM_Group.PPM_Factor)/(int32_t)PPM_Group.Capture_Div);  
-					gi16TargetAngle = i16ST_New + gi16TargetAngle;
+			Target_Angle = (int16_t)(( Angel_Tmp*(int32_t)Cmd->PPM_Factor)/(int32_t)PPM_Group.Capture_Div);  
+			Target_Angle += Cmd->Vr_Middle_Point;
 
-					if(gi16TargetAngle_old != gi16TargetAngle)
-					{
-						if(u16PPM_Period >=(PID_POSITION_SAMPLING_TIME + 1))
-							i32Step_Count = (int32_t)((int32_t)((gi16TargetAngle - gi16TargetAngle_old) << 5)*(PID_POSITION_SAMPLING_TIME + 1))/(u16PPM_Period);
-						else
-							i32Step_Count = 0;
-					}
+			#if (Stepping_Mode == On)
+				if(Target_Angle_old != Target_Angle)
+				{
+					if(PPM_Group.Capture_Period >=(PID_Pos_Loop_Time + 1))
+						Cmd->Step_Count = (int32_t)((int32_t)((Target_Angle - Target_Angle_old) << 5)*(PID_Pos_Loop_Time + 1))/(PPM_Group.Capture_Period);
 					else
-						i32Step_Count = 0;
+						Cmd->Step_Count = 0;
 				}
+				else
+					Cmd->Step_Count = 0;
+			#endif
 
-			}						 
+		}						 
 		
 	}
 }
@@ -337,7 +342,3 @@ void Mix_Function(System_Flag* Sys_Flag)
 
 
 			
-
-            //***********************************************************************
-			u16PPM_ErrorTime = EscConfig.Protect.u16PpmLossTime;
-			//***********************************************************************

@@ -8,6 +8,7 @@ static __IO uint16_t  gu16Temperature;  //Unit: C
 static __IO uint8_t   ADC_Flag ;
 
 
+
 void ADC_Initial_Fnct(void)
 {
 	GPIO_InitTypeDef 	GPIO_InitStructure;
@@ -114,9 +115,8 @@ void ADC_Initial_Fnct(void)
 
 	// ADC1 regular Software Start Conv
 	ADC_StartOfConversion(ADC_IP);
-
-
 }
+
 
 void ADC_Transfrom_Fnct(Data_From_ADC * ADC_Data,System_Count * Sys_Cnt)
 {

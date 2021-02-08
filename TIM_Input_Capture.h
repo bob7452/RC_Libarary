@@ -162,7 +162,7 @@
 void TIM_IC_Init(void);
 void PPM_Capture_Parameters_Init(sEscParas_t* EscConfig,System_Flag *Sys_Flag);
 void TIM_Input_Capture_Interrupt_Fnct(void);
-void PPM_Process_Fnct();
+void PPM_Process_Fnct(System_Flag *Sys_Flag,Cmd_Group * Cmd)
 
 /*******************************************************************************************/
 //                                  Muti_Range_Detection                                   //

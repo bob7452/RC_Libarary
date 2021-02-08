@@ -130,7 +130,6 @@ typedef struct
 	 volatile static uint16_t CaptureLimit;
 	 volatile static uint16_t Capture_Div;
 	 volatile static uint32_t Capture_Period;
-	 volatile static uint16_t PPM_Factor;
 	 volatile static uint16_t Capture_Rasing_Edge[2];
 	 volatile static uint16_t Capture_Both_Edge_Value[2];
 	 volatile static uint16_t Capture_Pulse_Width[2];
@@ -146,7 +145,14 @@ typedef struct
 	}Mix_Mode_Group;
  #endif
 
-
+ typedef struct 
+ {
+	volatile int32_t Target_Cmd;
+	volatile int16_t Vr_Middle_Point;
+	volatile int16_t PPM_Factor;
+	volatile uint8_t Step_Count;
+ }Cmd_Group;
+ 
 /*******************************************************************************************/
 //                                         ADC                                             //
 /*******************************************************************************************/
@@ -204,7 +210,9 @@ typedef struct
 /*******************************************************************************************/
 typedef struct
 {
-    volatile uint32_t ADC_Time_Count;
+    volatile uint16_t ADC_Time_Count;
+	volatile uint16_t PPM_Loss_Count;
+	volatile uint16_t Pid_Pos_Count;
 }System_Count;
 
 /*******************************************************************************************/
