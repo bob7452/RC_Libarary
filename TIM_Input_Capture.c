@@ -71,8 +71,8 @@ void TIM_IC_Init(void)
 
 void PPM_Capture_Parameters_Init(sEscParas_t* EscConfig,System_Flag *Sys_Flag)
 {
-	GUI_Capture_Max = (uint16_t)(ICP_CLK_MHZ * EscConfig->DrvBas->u16PulseHigherTime + Normal_Signal_Therehold);
-	GUI_Capture_Min = (uint16_t)(ICP_CLK_MHZ * EscConfig->DrvBas->u16PulseLowerTime  - Normal_Signal_Therehold);
+	GUI_Capture_Max = (uint16_t)(ICP_CLK_MHZ * EscConfig->DrvBas->u16PulseHigherTime + Normal_Signal_Threshold);
+	GUI_Capture_Min = (uint16_t)(ICP_CLK_MHZ * EscConfig->DrvBas->u16PulseLowerTime  - Normal_Signal_Threshold);
 	GUI_Capture_Mid = (uint16_t)(ICP_CLK_MHZ * EscConfig->DrvBas->u16PulseCentralTime);
 	GUI_Capture_Limit = (uint16_t)(ICP_CLK_MHZ * EscConfig->DrvBas->u16PulseHigherTime);
 
@@ -221,8 +221,8 @@ void PPM_Process_Fnct(System_Flag *Sys_Flag,Cmd_Group * Cmd)
 		if(Muti_Mode)
 		{
 			#if (Special_Mode == On) /* 833 Hz */
-				if ((PPM_Group.PPM_Capture_Period > (Special_Mode_Period_us-Special_Singal_Therehold)) && \
-					(PPM_Group.PPM_Capture_Period < (Special_Mode_Period_us+Special_Singal_Therehold)))
+				if ((PPM_Group.PPM_Capture_Period > (Special_Mode_Period_us-Special_Singal_Threshold)) && \
+					(PPM_Group.PPM_Capture_Period < (Special_Mode_Period_us+Special_Singal_Threshold)))
 				{
 					if ((PPM_Group.Capture_Pulse_Width[0]>=Special_Mode_Period_Max_us) && \
 						(PPM_Group.Capture_Pulse_Width[0]<=Special_Mode_Period_Max_us))
@@ -236,8 +236,8 @@ void PPM_Process_Fnct(System_Flag *Sys_Flag,Cmd_Group * Cmd)
 			
 			/* 40 Hz ~ 1.66 KHz expect 833 Hz */
 			#if (SSR_Mode == On)
-				if ((PPM_Group.PPM_Capture_Period < (Special_Mode_Period_us-Special_Singal_Therehold)) && \
-					(PPM_Group.PPM_Capture_Period > (Special_Mode_Period_us+Special_Singal_Therehold)))
+				if ((PPM_Group.PPM_Capture_Period < (Special_Mode_Period_us-Special_Singal_Threshold)) && \
+					(PPM_Group.PPM_Capture_Period > (Special_Mode_Period_us+Special_Singal_Threshold)))
 				{	
 					if	((PPM_Group.Capture_Pulse_Width[0] >= SSR_Mode_Pulse_Max_us) && \
 						(PPM_Group.Capture_Pulse_Width[0] <= SSR_Mode_Pulse_Min_us)) 
@@ -346,7 +346,7 @@ void Mix_Function(System_Flag* Sys_Flag)
 	{
 		Sys_Flag->ICP_Flag 	|=ICP_Signal_Sharp_Change_Flag;	
 		Capture_Tmep = (uint32_t)Mix_Group.PPM_Capture_Delta*1000/PPM_Group.Capture_Period;
-		if(Capture_Tmep >= Signal_Sharp_Change_Therehold && (Mix_Group.PPM_Capture_Dir[0] == Mix_Group.PPM_Capture_Dir[1]))
+		if(Capture_Tmep >= Signal_Sharp_Change_Threshold && (Mix_Group.PPM_Capture_Dir[0] == Mix_Group.PPM_Capture_Dir[1]))
 			Sys_Flag->ICP_Flag |= ICP_Signal_Sharp_Change_Flag;
 		else
 			Sys_Flag->ICP_Flag &= (~ICP_Signal_Sharp_Change_Flag);
@@ -362,6 +362,7 @@ void PPM_Filter_Fnct(System_Flag* Sys_Flag,System_Count* Sys_Cnt,uint8_t GPIO_Le
 {
 	if (((Sys_Flag->ICP_Flag & ICP_PPM_Soft_Interrupt_Flag)>>7==true))
 	{
+		Sys_Flag->ICP_Flag |= ICP_Pusle_Width_Finish;
 		PPM_Group.Capture_Pulse_Width[1] = PPM_Group.Capture_Pulse_Width[0];
 		PPM_Group.Capture_Pulse_Width[0] = (uint16_t)(PPM_Group.Capture_Both_Edge_Value[0]-PPM_Group.Capture_Both_Edge_Value[1]);
 		Sys_Flag->ICP_Flag &= (~ICP_PPM_Soft_Lock_Flag);
@@ -374,6 +375,7 @@ void PPM_Filter_Fnct(System_Flag* Sys_Flag,System_Count* Sys_Cnt,uint8_t GPIO_Le
 		if(((Sys_Flag->ICP_Flag & ICP_PPM_Filter_Raising_Lock)>>5)==false)
 		{
 			Sys_Flag->ICP_Flag &= (~ICP_Period_Finish);
+			Sys_Flag->ICP_Flag &= (~ICP_Pusle_Width_Finish);
 			Sys_Flag->ICP_Flag |= ICP_PPM_Filter_Raising_Lock;
 			Sys_Flag->ICP_Flag |= ICP_PPM_Soft_Lock_Flag;
 			Sys_Cnt->ICP_Filter_Count = PPM_Filter_Cnt;

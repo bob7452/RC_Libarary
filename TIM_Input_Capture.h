@@ -92,7 +92,7 @@
 #elif (Special_Signal_Buffer > 50)
     #error "Special_Signal_Buffer is illegal"
 #else
-    #define Special_Singal_Therehold (Special_Signal_Buffer*ICP_CLK_MHZ)
+    #define Special_Singal_Threshold (Special_Signal_Buffer*ICP_CLK_MHZ)
 #endif
 
 /*******************************************************************************************/
@@ -142,7 +142,7 @@
 #elif (SSR_Signal_Buffer >50)
     #error "SSR_Signal_Buffer is illegal"
 #else
-    #define SSR_Signal_Therehold (SSR_Signal_Buffer*ICP_CLK_MHZ)
+    #define SSR_Signal_Threshold (SSR_Signal_Buffer*ICP_CLK_MHZ)
 #endif
 
 /*******************************************************************************************/
@@ -153,7 +153,7 @@
 #elif (Normal_Signal_Buffer >50)
     #error "Normal_Signal_Buffer is illegal"
 #else
-    #define Normal_Signal_Therehold (Normal_Signal_Buffer*ICP_CLK_MHZ)
+    #define Normal_Signal_Threshold (Normal_Signal_Buffer*ICP_CLK_MHZ)
 #endif
 
 /*******************************************************************************************/
