@@ -182,11 +182,11 @@ void PPM_Process_Fnct(System_Flag *Sys_Flag,Cmd_Group * Cmd)
 		#endif
 		
 		#if(Dead_Band_Fnct == On)
-			PPM_Dead_Band_Fnct(&Sys_Flag);
+			PPM_Dead_Band_Fnct((System_Flag*) Sys_Flag);
 		#endif
 
 		#if (Driving_Mode == Mix)
-			Mix_Function(&Sys_Flag);
+			Mix_Function((System_Flag*) Sys_Flag);
 		#endif
 
 
@@ -421,7 +421,6 @@ void PPM_Filter_Fnct_Falling(System_Flag* Sys_Flag,System_Count* Sys_Cnt,uint8_t
 			Sys_Flag->ICP_Flag &= (~ICP_Period_Finish);
 			Sys_Flag->ICP_Flag &= (~ICP_Pusle_Width_Finish);
 			Sys_Flag->ICP_Flag |= ICP_PPM_Filter_Raising_Lock;
-			Sys_Flag->ICP_Flag |= ICP_PPM_Soft_Lock_Flag;
 			PPM_Group.Capture_Rasing_Edge[0] = TIM_GetCapture1(IC_TIMx);
 			PPM_Group.Capture_Both_Edge_Value[0] = PPM_Group.Capture_Rasing_Edge[0];
 			return;
@@ -446,6 +445,7 @@ void PPM_Filter_Fnct_Falling(System_Flag* Sys_Flag,System_Count* Sys_Cnt,uint8_t
 	{
 	  	PPM_Group.Capture_Both_Edge_Value[1] =  TIM_GetCapture1(IC_TIMx);
 		Sys_Cnt->ICP_Filter_Count = PPM_Filter_Cnt;
+		Sys_Flag->ICP_Flag |= ICP_PPM_Soft_Lock_Flag;
 		return;
 	}
 
