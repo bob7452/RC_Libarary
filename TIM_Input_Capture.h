@@ -179,6 +179,9 @@ void PPM_Process_Fnct(System_Flag *Sys_Flag,Cmd_Group * Cmd);
 void PPM_Filter_Fnct(System_Flag* Sys_Flag,System_Count* Sys_Cnt,uint8_t GPIO_Level);
 #endif
 
+#ifdef PPM_Filter_Fnct_Falling
+void PPM_Filter_Fnct_Falling(System_Flag* Sys_Flag,System_Count* Sys_Cnt,uint8_t GPIO_Level);
+#endif
 /*******************************************************************************************/
 //                                  PPM_Dead_Band_Fnct                                     //
 /*******************************************************************************************/
