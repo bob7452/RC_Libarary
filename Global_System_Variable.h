@@ -124,24 +124,24 @@ typedef struct
 /*******************************************************************************************/
 typedef struct
 {
-     volatile static uint16_t CaptureMax;
-     volatile static uint16_t CaptureMid;
-     volatile static uint16_t CaptureMin;
-	 volatile static uint16_t CaptureLimit;
-	 volatile static uint16_t Capture_Div;
-	 volatile static uint32_t Capture_Period;
-	 volatile static uint16_t Capture_Rasing_Edge[2];
-	 volatile static uint16_t Capture_Both_Edge_Value[2];
-	 volatile static uint16_t Capture_Pulse_Width[2];
-	 volatile static uint16_t Uart_Port_Ms_Lower;
-     volatile static uint16_t Uart_Port_Ms_Upper;
+     volatile  uint16_t CaptureMax;
+     volatile  uint16_t CaptureMid;
+     volatile  uint16_t CaptureMin;
+	 volatile  uint16_t CaptureLimit;
+	 volatile  uint16_t Capture_Div;
+	 volatile  uint32_t Capture_Period;
+	 volatile  uint16_t Capture_Rasing_Edge[2];
+	 volatile  uint16_t Capture_Both_Edge_Value[2];
+	 volatile  uint16_t Capture_Pulse_Width[2];
+	 volatile  uint16_t Uart_Port_Ms_Lower;
+     volatile  uint16_t Uart_Port_Ms_Upper;
 }Capture_Group;
 
 #if (Driving_Mode == Mix)
 	typedef struct 
 	{
-		volatile static uint16_t PPM_Capture_Delta;
-		volatile static uint8_t  PPM_Capture_Dir[2];
+		volatile  uint16_t PPM_Capture_Delta;
+		volatile  uint8_t  PPM_Capture_Dir[2];
 	}Mix_Mode_Group;
  #endif
 
@@ -199,9 +199,9 @@ typedef struct
 /*******************************************************************************************/
 typedef struct 
 {
-	volatile static uint8_t Bus_Status_Flag; 
-	volatile static uint8_t ICP_Flag;
-	volatile static uint8_t Motor_Operation_Status_Flag;  
+	volatile  uint8_t Bus_Status_Flag; 
+	volatile  uint8_t ICP_Flag;
+	volatile  uint8_t Motor_Operation_Status_Flag;  
 }System_Flag;
 
 
