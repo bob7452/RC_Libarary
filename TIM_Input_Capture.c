@@ -131,6 +131,7 @@ void TIM_Input_Capture_Interrupt_Fnct(System_Flag * Sys_Flag,System_Count *Sys_C
 		#else
 			Sys_Flag->ICP_Flag 	   			   |= ICP_Initial_Finish;
 			PPM_Group.Capture_Raising_Edge[1] 	= TIM_GetCapture1(IC_TIMx);
+			PPM_Group.Capture_Both_Edge[0] 	  	= PPM_Group.Capture_Raising_Edge[1];
 			PPM_Group.Capture_Pulse_Width[0]	= PPM_Group.Capture_Mid;
 		#endif
         return;

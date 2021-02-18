@@ -161,7 +161,7 @@
 /*******************************************************************************************/
 void TIM_IC_Init(void);
 void PPM_Capture_Parameters_Init(sEscParas_t* EscConfig,System_Flag *Sys_Flag);
-void TIM_Input_Capture_Interrupt_Fnct(void);
+void TIM_Input_Capture_Interrupt_Fnct(System_Flag * Sys_Flag,System_Count *Sys_Cnt);
 void PPM_Process_Fnct(System_Flag *Sys_Flag,Cmd_Group * Cmd);
 
 
