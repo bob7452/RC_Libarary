@@ -95,7 +95,6 @@ void PPM_Capture_Parameters_Init(sEscParas_t* EscConfig,System_Flag *Sys_Flag)
 	PPM_Group.Capture_Max  = GUI_Capture_Max;
 	PPM_Group.CaptureLimit = (uint16_t)(ICP_CLK_MHZ * EscConfig->DrvBas.u16PulseHigherTime); 
 	PPM_Group.Capture_Div  =  PPM_Group.CaptureLimit - PPM_Group.Capture_Mid ;
-	PPM_Group.PPM_Factor = (int16_t)(((int32_t)INT16_MAX * (int32_t)(EscConfig->DrvBas.u16PulseHigherAng-1800)/10)/180);
 
 	PPM_Group.Uart_Port_Ms_Lower = 13600 ; 
 	PPM_Group.Uart_Port_Ms_Upper = 15000 ;
@@ -132,7 +131,7 @@ void TIM_Input_Capture_Interrupt_Fnct(System_Flag * Sys_Flag,System_Count *Sys_C
 			Sys_Flag->ICP_Flag 	   			   |= ICP_Initial_Finish;
 			PPM_Group.Capture_Raising_Edge[1] 	= TIM_GetCapture1(IC_TIMx);
 			PPM_Group.Capture_Both_Edge[0] 	  	= PPM_Group.Capture_Raising_Edge[1];
-			PPM_Group.Capture_Pulse_Width[0]	= PPM_Group.Capture_Mid;
+			PPM_Group.Capture_Pulse_Width[0]	= PPM_Group.CaptureMid;
 		#endif
         return;
 	}
@@ -173,7 +172,7 @@ void PPM_Process_Fnct(System_Flag *Sys_Flag,Cmd_Group * Cmd)
 	}
 
 	if((PPM_Group.Capture_Pulse_Width[0] >= PPM_Group.CaptureMin) && (PPM_Group.Capture_Pulse_Width[0]<=PPM_Group.CaptureMax) && \
-		(Sys_Flag->Bus_Status_Flag & Bus_Arbitration)==false)
+		((Sys_Flag->Bus_Status_Flag & Bus_Arbitration)>>2)==false)
 	{
 		GUI_Com_Cnt = 0;
 		PPM_Group.Capture_Period = Round_Value(PPM_Group.Capture_Period,1000) * Period_Ratio_Signal_to_Control; //Normalize_Cmd_Period (ms)

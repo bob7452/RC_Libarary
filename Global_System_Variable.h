@@ -1,8 +1,6 @@
 #ifndef __Global_System_Variable__H
 #define __Global_System_Variable__H
 
-#include "Plane.h"
-
 /*******************************************************************************************/
 //                             System_Count_Declaration                                    //
 /*******************************************************************************************/
@@ -130,8 +128,8 @@ typedef struct
 	 volatile  uint16_t CaptureLimit;
 	 volatile  uint16_t Capture_Div;
 	 volatile  uint32_t Capture_Period;
-	 volatile  uint16_t Capture_Rasing_Edge[2];
-	 volatile  uint16_t Capture_Both_Edge_Value[2];
+	 volatile  uint16_t Capture_Raising_Edge[2];
+	 volatile  uint16_t Capture_Both_Edge[2];
 	 volatile  uint16_t Capture_Pulse_Width[2];
 	 volatile  uint16_t Uart_Port_Ms_Lower;
      volatile  uint16_t Uart_Port_Ms_Upper;
@@ -156,8 +154,6 @@ typedef struct
 /*******************************************************************************************/
 //                                         ADC                                             //
 /*******************************************************************************************/
-#define V_FACTOR (uint16_t)(4096 * R_SHUNT2 / (R_SHUNT1 + R_SHUNT2))
-
 typedef struct 
 {
     volatile uint16_t    U16_VDCBus;
