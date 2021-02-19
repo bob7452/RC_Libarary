@@ -71,12 +71,12 @@ void TIM_IC_Init(void)
 
 void PPM_Capture_Parameters_Init(sEscParas_t* EscConfig,System_Flag *Sys_Flag)
 {
-	GUI_Capture_Max = (uint16_t)(ICP_CLK_MHZ * EscConfig->DrvBas->u16PulseHigherTime + Normal_Signal_Threshold);
-	GUI_Capture_Min = (uint16_t)(ICP_CLK_MHZ * EscConfig->DrvBas->u16PulseLowerTime  - Normal_Signal_Threshold);
-	GUI_Capture_Mid = (uint16_t)(ICP_CLK_MHZ * EscConfig->DrvBas->u16PulseCentralTime);
-	GUI_Capture_Limit = (uint16_t)(ICP_CLK_MHZ * EscConfig->DrvBas->u16PulseHigherTime);
+	GUI_Capture_Max = (uint16_t)(ICP_CLK_MHZ * EscConfig->DrvBas.u16PulseHigherTime + Normal_Signal_Threshold);
+	GUI_Capture_Min = (uint16_t)(ICP_CLK_MHZ * EscConfig->DrvBas.u16PulseLowerTime  - Normal_Signal_Threshold);
+	GUI_Capture_Mid = (uint16_t)(ICP_CLK_MHZ * EscConfig->DrvBas.u16PulseCentralTime);
+	GUI_Capture_Limit = (uint16_t)(ICP_CLK_MHZ * EscConfig->DrvBas.u16PulseHigherTime);
 
-	Muti_Mode = (EscConfig->Protect->u16HallFailOnOff == 0)
+	Muti_Mode = (EscConfig->Protect.u16HallFailOnOff == 0);
 
 	#if (SSR_Mode == On)
 	{
@@ -91,17 +91,17 @@ void PPM_Capture_Parameters_Init(sEscParas_t* EscConfig,System_Flag *Sys_Flag)
 	#endif
 
 	PPM_Group.Capture_Min  = GUI_Capture_Min;
-	PPM_Group.Capture_Mid  = (uint16_t)(ICP_CLK_MHZ * EscConfig->DrvBas->u16PulseCentralTime);
+	PPM_Group.Capture_Mid  = (uint16_t)(ICP_CLK_MHZ * EscConfig->DrvBas.u16PulseCentralTime);
 	PPM_Group.Capture_Max  = GUI_Capture_Max;
-	PPM_Group.CaptureLimit = (uint16_t)(ICP_CLK_MHZ * EscConfig->DrvBas->u16PulseHigherTime); 
+	PPM_Group.CaptureLimit = (uint16_t)(ICP_CLK_MHZ * EscConfig->DrvBas.u16PulseHigherTime); 
 	PPM_Group.Capture_Div  =  PPM_Group.CaptureLimit - PPM_Group.Capture_Mid ;
-	PPM_Group.PPM_Factor = (int16_t)(((int32_t)INT16_MAX * (int32_t)(EscConfig.DrvBas.u16PulseHigherAng-1800)/10)/180);
+	PPM_Group.PPM_Factor = (int16_t)(((int32_t)INT16_MAX * (int32_t)(EscConfig->DrvBas.u16PulseHigherAng-1800)/10)/180);
 
 	PPM_Group.Uart_Port_Ms_Lower = 13600 ; 
 	PPM_Group.Uart_Port_Ms_Upper = 15000 ;
 
-	Dead_Band_Cnt = EscConfig->DrvBas->u16DeadBand;
-	PPM_Loss_Cnt = EscConfig.Protect.u16PpmLossTime;
+	Dead_Band_Cnt = EscConfig->DrvBas.u16DeadBand;
+	PPM_Loss_Cnt = EscConfig->Protect.u16PpmLossTime;
 
 	#if(Dead_Band_Fnct == On)
 		Sys_Flag->ICP_Flag |= ICP_Dead_Band_Check_Real;
