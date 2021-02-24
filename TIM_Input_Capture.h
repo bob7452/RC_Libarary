@@ -51,7 +51,7 @@
 #elif (Special_Mode_Pulse_Min > 65535)
     #error "Special_Mode_Period_Min is illegal"
 #else
-    #define Special_Mode_Period_Min_us (Special_Mode_Period_Min*ICP_CLK_MHZ)
+    #define Special_Mode_Pulse_Min_us (Special_Mode_Pulse_Min*ICP_CLK_MHZ)
 #endif
 
 /*******************************************************************************************/
@@ -66,7 +66,7 @@
 #elif (Special_Mode_Pulse_Mid > 65535)
     #error "Special_Mode_Period_Mid is illegal"
 #else
-    #define Special_Mode_Period_Mid_us (Special_Mode_Period_Mid*ICP_CLK_MHZ)
+    #define Special_Mode_Pulse_Mid_us (Special_Mode_Pulse_Mid*ICP_CLK_MHZ)
 #endif
 
 /*******************************************************************************************/
@@ -81,7 +81,7 @@
 #elif (Special_Mode_Pulse_Max > 65535)
     #error "Special_Mode_Period_Max is illegal"
 #else
-    #define Special_Mode_Period_Max_us (Special_Mode_Period_Max*ICP_CLK_MHZ)
+    #define Special_Mode_Pulse_Max_us (Special_Mode_Pulse_Max*ICP_CLK_MHZ)
 #endif
 
 /*******************************************************************************************/
