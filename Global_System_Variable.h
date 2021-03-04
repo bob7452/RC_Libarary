@@ -26,6 +26,9 @@
 #define System_Clock      16000000uL
 #define System_Extern_Osi 16000000uL
 
+#define On 1
+#define Off 0
+
 enum System_State_Machine
 {
     Initial =0,
@@ -33,8 +36,6 @@ enum System_State_Machine
     Finish,
 	Idle = 0,
 	Busy,
-	Off = 0,
-	On
 };
 
 typedef struct 

@@ -90,9 +90,9 @@ void PPM_Capture_Parameters_Init(sEscParas_t* EscConfig,System_Flag *Sys_Flag)
 	}
 	#endif
 
-	PPM_Group.Capture_Min  = GUI_Capture_Min;
+	PPM_Group.Capture_Min  = Normal_SSR_Min_Pulse;
 	PPM_Group.Capture_Mid  = (uint16_t)(ICP_CLK_MHZ * EscConfig->DrvBas.u16PulseCentralTime);
-	PPM_Group.Capture_Max  = GUI_Capture_Max;
+	PPM_Group.Capture_Max  = Normal_SSR_Max_Pulse;
 	PPM_Group.CaptureLimit = (uint16_t)(ICP_CLK_MHZ * EscConfig->DrvBas.u16PulseHigherTime); 
 	PPM_Group.Capture_Div  =  PPM_Group.CaptureLimit - PPM_Group.Capture_Mid ;
 
@@ -216,39 +216,47 @@ void PPM_Process_Fnct(System_Flag *Sys_Flag,Cmd_Group * Cmd)
 }
 
 #if(Muti_Mode_Compile >=1)
-	void Muti_Range_Detection(void)
+void Muti_Range_Detection(Signal_Group* Signal)
 	{
 		if(Muti_Mode)
 		{
 			#if (Special_Mode == On) /* 833 Hz */
-				if ((PPM_Group.PPM_Capture_Period > (Special_Mode_Period_us-Special_Singal_Threshold)) && \
-					(PPM_Group.PPM_Capture_Period < (Special_Mode_Period_us+Special_Singal_Threshold)))
+				if ((PPM_Group.Capture_Period > (Special_Mode_Period_us-Special_Singal_Threshold)) && \
+					(PPM_Group.Capture_Period < (Special_Mode_Period_us+Special_Singal_Threshold)))
 				{
-					if ((PPM_Group.Capture_Pulse_Width[0]>=Special_Mode_Period_Max_us) && \
-						(PPM_Group.Capture_Pulse_Width[0]<=Special_Mode_Period_Max_us))
+					if ((PPM_Group.Capture_Pulse_Width[0]>Special_Mode_Pulse_Max_us) || \
+						(PPM_Group.Capture_Pulse_Width[0]<Special_Mode_Pulse_Min_us))
 						return;
 					
 					SSR_Flag = false;
-					PPM_Group.CaptureMid 	= (uint16_t) (Special_Mode_Period_Mid_us);
-					PPM_Group.CaptureLimit 	= (uint16_t) (Special_Mode_Period_Max_us);		
+					PPM_Group.CaptureMid 	= (uint16_t) (Special_Mode_Pulse_Mid_us);
+					PPM_Group.CaptureLimit 	= (uint16_t) (Special_Mode_Pulse_Max_us);	
+					PPM_Group.Capture_Div  =  PPM_Group.CaptureLimit - PPM_Group.CaptureMid ;
+					return;
 				}
 			#endif	
 			
 			/* 40 Hz ~ 1.66 KHz expect 833 Hz */
 			#if (SSR_Mode == On)
-				if ((PPM_Group.PPM_Capture_Period < (Special_Mode_Period_us-Special_Singal_Threshold)) && \
-					(PPM_Group.PPM_Capture_Period > (Special_Mode_Period_us+Special_Singal_Threshold)))
+				if ((PPM_Group.Capture_Period < (Special_Mode_Period_us-Special_Singal_Threshold)) || \
+					(PPM_Group.Capture_Period > (Special_Mode_Period_us+Special_Singal_Threshold)))
 				{	
-					if	((PPM_Group.Capture_Pulse_Width[0] >= SSR_Mode_Pulse_Max_us) && \
-						(PPM_Group.Capture_Pulse_Width[0] <= SSR_Mode_Pulse_Min_us)) 
-						return;
-
-					if (PPM_Group.Capture_Pulse_Width[0] >= SSR_Mode_Pulse_Max_us && PPM_Group.Capture_Pulse_Width[0] <= GUI_Capture_Min)
+					if (PPM_Group.Capture_Pulse_Width[0] <= SSR_Mode_Pulse_Max_us && PPM_Group.Capture_Pulse_Width[0] >= GUI_Capture_Min)
 						SSR_Flag = SSR_Flag;
 					else if (PPM_Group.Capture_Pulse_Width[0]<= SSR_Mode_Pulse_Max_us)	
+					{
 						SSR_Flag = true;
+					}
 					else
+					{
 						SSR_Flag = false;
+					}
+
+					if	((PPM_Group.Capture_Pulse_Width[0] > SSR_Mode_Pulse_Max_us) || \
+						(PPM_Group.Capture_Pulse_Width[0] < SSR_Mode_Pulse_Min_us)) 
+					{
+						SSR_Flag = false;
+					}
 				}
 
 				if(SSR_Flag)
@@ -258,7 +266,7 @@ void PPM_Process_Fnct(System_Flag *Sys_Flag,Cmd_Group * Cmd)
 				}
 				else
 				{						
-					PPM_Group.Capture_Mid  = GUI_Capture_Mid;
+					PPM_Group.CaptureMid  = GUI_Capture_Mid;
 					PPM_Group.CaptureLimit = GUI_Capture_Limit; 
 				}
 				
